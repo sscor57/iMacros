@@ -1,5 +1,5 @@
 // navigates via the course search feature to the specified course id
-var goToCourseID = function(bb9_courseID) {
+var goToCourseID = function(bb9_courseID,userName) {
     try {
 		var macroCode = "";
 		var e = "";
@@ -31,7 +31,7 @@ var goToCourseID = function(bb9_courseID) {
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
     
-        searchPattern = RegExp(courseID+"</a>");
+        searchPattern = RegExp(bb9_courseID+"</a>");
     
         if (extract.search(searchPattern) != -1) {
             macroCode = "TAB T=1\nFRAME F=2\n";
