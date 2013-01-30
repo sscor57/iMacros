@@ -1,5 +1,123 @@
+/*
+  the purpose of this script is to fix the institution wide artifacts in a BB9 SP4 
+	template. it has been found to work on SP9, but it's not thoroughly tested. It will
+	certainly fail on SP11.
+	
+	WARNING:
+		* this script assumes that the course files for your course
+		  resides within the courses home directory. make certain the
+		  version folder for your courses lives in that directory for
+		  the duration of the scripts operations.
+		   
+		* if you use a popup blocker, this will likely fail on you.
+		
+		* if links are still broken after running this script, yet you
+		  recieved no error messages, check that the xid is correct for
+		  your artifact in the array of artifacts for your environment.
+	
+	last edited: 01/25/2013 by c. swope
+*/
+var courseID = null;
+var userName = null;
+var errorMessage = "Something unexpected happened:\n";
+var progressMessage = "____REPORT:\n";
+
+var dvsxArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-13909_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1210_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-6470_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-8608_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-10216_1\" artifacttype=\"html\">Ask Your Instructor</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-13918_1\" artifacttype=\"html\">Supplemental Instruction</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-7179_1\" artifacttype=\"html\">SOBT Media</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-6460_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-7171_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-6467_1\" artifacttype=\"html\">First Course Support Getting Started</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-6466_1\" artifacttype=\"html\">First Course Support</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-6469_1\" artifacttype=\"html\">First Course Support Final Unit</a>"
+	];
+var cbsaArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-116502_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1210_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1227_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1211_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1212_1\" artifacttype=\"html\">Ask Your Instructor</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-135927_1\" artifacttype=\"html\">Supplemental Instruction</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-20978_1\" artifacttype=\"html\">SOBT Media</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1214_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1215_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-126499_1\" artifacttype=\"html\">First Course Support Getting Started</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-126500_1\" artifacttype=\"html\">First Course Support</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-129509_1\" artifacttype=\"html\">First Course Support Final Unit</a>"
+	];
+var prsaArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-423974_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1310_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1307_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1309_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1306_1\" artifacttype=\"html\">Ask Your Instructor</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-71516_1\" artifacttype=\"html\">Supplemental Instruction</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1316_1\" artifacttype=\"html\">SOBT Media</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1314_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1315_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-51627_1\" artifacttype=\"html\">First Course Support Getting Started</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-51636_1\" artifacttype=\"html\">First Course Support</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-51624_1\" artifacttype=\"html\">First Course Support Final Unit</a>"
+	];
+var cbsbArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-37316_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-18902_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-18903_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5965_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-xxxx_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-xxxx_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5966_1\" artifacttype=\"html\">Ask Your Instructor</a>"
+	];
+var prsbArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1313_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1306_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1304_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1305_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1303_1\" artifacttype=\"html\">Ask Your Instructor</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5514_1\" artifacttype=\"html\">Supplemental Instruction</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1309_1\" artifacttype=\"html\">SOUS_Media.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1310_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1311_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5512_1\" artifacttype=\"html\">First Course Support Getting Started</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5513_1\" artifacttype=\"html\">First Course Support</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5511_1\" artifacttype=\"html\">First Course Support Final Unit</a>"
+	];
+var cbscArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1423_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1309_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1302_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1308_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1301_1\" artifacttype=\"html\">Ask Your Instructor</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1307_1\" artifacttype=\"html\">Supplemental Instruction</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1311_1\" artifacttype=\"html\">SOPSL_Media.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1313_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1314_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1304_1\" artifacttype=\"html\">First Course Support Getting Started</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1305_1\" artifacttype=\"html\">First Course Support</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1303_1\" artifacttype=\"html\">First Course Support Final Unit</a>"
+	];
+var prscArtifacts = [
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1500_1\" artifacttype=\"html\">OOB_Print.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1707_1\" artifacttype=\"html\">Welcome and Introductions</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1702_1\" artifacttype=\"html\">Faculty Expectations</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1706_1\" artifacttype=\"html\">Updates and Handouts</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1701_1\" artifacttype=\"html\">Ask Your Instructor</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-5514_1\" artifacttype=\"html\">Supplemental Instruction</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1711_1\" artifacttype=\"html\">SOPSL_Media.html</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1709_1\" artifacttype=\"html\">Review Policies and Procedures</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1710_1\" artifacttype=\"html\">Review the Syllabus</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1704_1\" artifacttype=\"html\">First Course Support Getting Started</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1705_1\" artifacttype=\"html\">First Course Support</a>",
+	"<a target=\"_blank\" href=\"/bbcswebdav/xid-1703_1\" artifacttype=\"html\">First Course Support Final Unit</a>"
+	];
+
 // navigates via the course search feature to the specified course id
-var goToCourseID = function(bb9_courseID,userName) {
+var goToCourseID = function(bb9_courseID) {
     try {
 		var macroCode = "";
 		var e = "";
@@ -7,7 +125,7 @@ var goToCourseID = function(bb9_courseID,userName) {
         var searchPattern = "";
 		
 		if (bb9_courseID === null) {
-		    bb9_courseID = prompt("Enter the Destination Course ID:","TEMPLATE_TESTSUB1333_00001");
+		    bb9_courseID = prompt("Enter the Destination Course ID:","TEMPLATE_MHA5002_00010");
 		}
         
         macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
@@ -31,7 +149,7 @@ var goToCourseID = function(bb9_courseID,userName) {
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
     
-        searchPattern = RegExp(bb9_courseID+"</a>");
+        searchPattern = RegExp(courseID+"</a>");
     
         if (extract.search(searchPattern) != -1) {
             macroCode = "TAB T=1\nFRAME F=2\n";
@@ -93,7 +211,7 @@ var unenrollInCourseID = function(templateID) {
 		var tbody = "";
 		var rowsToScan = new Array;
 		var i = 0;
-		
+
         macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
         macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -103,14 +221,14 @@ var unenrollInCourseID = function(templateID) {
         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerFormSearch ATTR=ID:courseInfoSearchText CONTENT="+templateID+"\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:courseManagerFormSearch ATTR=VALUE:Go\n";
         e = iimPlay("CODE:" + macroCode);
-		
+
 		macroCode = "TAB T=1\nFRAME F=2\n";
 		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
 		e = iimPlay("CODE:" + macroCode);
 		tbody = iimGetLastExtract();
-		
+
 		contextualMenuIdNumber = tbody.match(/cmlink_(\w{32})/)[1];
-		
+
 		macroCode = "TAB T=1\nFRAME F=2\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=ID:admin_course_list_users\n";
@@ -136,7 +254,7 @@ var unenrollInCourseID = function(templateID) {
                 progressMessage += "Un-enrolled from:\t"+templateID+".\n";
             }
         }
-		
+
 		macroCode = "TAB T=1\nFRAME F=2\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
 		e = iimPlay("CODE:" + macroCode);
@@ -634,7 +752,7 @@ var controlFlow = function() {
         var discussionTitles = new Array;
 		
 		if (courseID === null) {
-		    bb9_courseID = prompt("Enter the Destination Course ID:","TEMPLATE_TESTSUB1333_00001");
+		    bb9_courseID = prompt("Enter the Destination Course ID:","TEMPLATE_MHA5002_00010");
 		    courseID = bb9_courseID;
 		}
     
@@ -663,6 +781,7 @@ var controlFlow = function() {
             }
         }
         discussionArea(discussionTitles);
+		unenrollInCourseID(bb9_courseID);
 		
         progressMessage += "Completed fixing institutionally common artifacts.";
         alert(progressMessage);
@@ -672,95 +791,4 @@ var controlFlow = function() {
     }
 }
 
-/*
-    courseListSection is meant to run while the BB9 Course Search feature is displaying at
-    least one result. it will ignore any course IDs that do not conform to Capella 
-    section naming conventions.
-*/
-var courseListSections = function() {
-	try {
-		var courseIDsToGoTo = new Array;
-		var i = 0;
-		var courseIDs = new Array;
-		var courseID = "";
-		var macroCode = "";
-		var e = "";
-		var extract = "";
-		
-		macroCode = "TAB T=1\nFRAME F=2\n";
-		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
-		e = iimPlay("CODE:" + macroCode);
-		extract = iimGetLastExtract();
-		
-		courseIDsToGoTo = extract.match(/<tr .+?<\/tr>/g);
-		
-		for (i=0;i<courseIDsToGoTo.length;i++) {
-			if (courseIDsToGoTo[i].match(/>([(?:TESTSUB\d{4})|(?:\w{2,4}\d{4})]+?_\w+?_\w_\w+?_\w+?_\w+?)</) != null) {
-				courseID = courseIDsToGoTo[i].match(/>([(?:TESTSUB\d{4})|(?:\w{2,4}\d{4})]+?_\w+?_\w_\w+?_\w+?_\w+?)</)[1];
-				courseIDs.push(courseID);
-				progressMessage += "Located section:\t"+courseID+"\n";
-			}
-		}
-		return courseIDs
-	} catch(err) {
-		alert(err.message);
-	}
-}
-
-var createDraftSafeAssignment = function(title) {
-	try {
-		var macroCode = "";
-		var e = "";
-		
-		macroCode = "TAB T=1\nFRAME F=2\n";
-		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
-		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:SafeAssignment\n";
-		e = iimPlay("CODE:" + macroCode);
-		
-		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:mainForm ATTR=ID:titleInput CONTENT="+addIIMSpaces(title)+"\n";
-		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:mainForm ATTR=NAME:text CONTENT="+addIIMSpaces("Use this link to submit drafts of discussions or assignments to check for text that matches sources, and to make sure you are citing your sources appropriately before turning in your final version to the instructor for grading.")+"\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:mainForm ATTR=NAME:trackNumberOfViews CONTENT=YES\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:mainForm ATTR=NAME:isDraft CONTENT=YES\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:mainForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
-		e = iimPlay("CODE:" + macroCode);
-	} catch(err) {
-		alert(err.message);
-	}
-}
-
-var createFinalSafeAssignment = function(title) {
-	try {
-		var macroCode = "";
-		var e = "";
-		
-		macroCode = "TAB T=1\nFRAME F=2\n";
-		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
-		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:SafeAssignment\n";
-		e = iimPlay("CODE:" + macroCode);
-		
-		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:mainForm ATTR=ID:titleInput CONTENT="+addIIMSpaces(title)+"\n";
-		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:mainForm ATTR=NAME:text CONTENT="+addIIMSpaces("Use this link to submit the FINAL version of your course project or final paper (the version you are submitting for grading in Assignments) to check for text that matches sources, and to make sure you are citing your sources appropriately. This link can only be used ONCE. Your submission will be saved to the Capella Database and reduce the risk of other learners using your work without giving you credit.")+"\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:mainForm ATTR=NAME:trackNumberOfViews CONTENT=YES\n";
-		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:mainForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
-		e = iimPlay("CODE:" + macroCode);
-	} catch(err) {
-		alert(err.message);
-	}
-}
-
-var goSafeAssign = function() {
-    try {
-		var macroCode = "";
-		var e = "";
-
-        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-        macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.course.tools_groupExpanderLink\n";
-        macroCode += "TAG POS=2 TYPE=A ATTR=TXT:SafeAssign\n";
-        e = iimPlay("CODE:" + macroCode);
-	} catch (e) {
-	    errorMessage += err.message;
-    	alert(errorMessage);
-	}
-}
+controlFlow();
