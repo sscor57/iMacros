@@ -3,17 +3,19 @@ var controlFlow = function() {
         var bb9_courseID = null;
         var userName = null;
 		var userCourse = new Array;
+		var progressMessage = "";
+		var errorMessage = "";
         
         userCourse = goToCourseID(bb9_courseID,userName);
         pauseMacro();
         unenrollInCourseID(userCourse[0],userCourse[1]);
     } catch(err) {
-		alert(err.message);
+	    errorMessage += "\tcontrolFlow() says: "+err.message+"\n";
     }
 }
 
 // navigates via the course search feature to the specified course id
-var goToCourseID = function(bb9_courseID,userName) {
+var goToCourseID = function(bb9_courseID,userName,progressMessage,errorMessage) {
     try {
 		var macroCode = "";
 		var e = "";
@@ -60,7 +62,7 @@ var goToCourseID = function(bb9_courseID,userName) {
 	}
 }
 
-var enrollInCourseID = function(userName,role) {
+var enrollInCourseID = function(userName,role,progressMessage,errorMessage) {
 	try {
 		var macroCode = "";
 		var e = "";
@@ -91,7 +93,7 @@ var enrollInCourseID = function(userName,role) {
 			progressMessage += userName+" is already enrolled in:\t";
 			return true
 		} else {
-			progressMessage += "Failed to enroll"+userName+".";
+	    errorMessage += "\tenrollInCourseID() says: "+err.message+"\n";
 			return false
 		}
 	} catch(err) {
@@ -99,7 +101,7 @@ var enrollInCourseID = function(userName,role) {
 	}
 }
 
-var unenrollInCourseID = function(bb9_courseID,userName) {
+var unenrollInCourseID = function(bb9_courseID,userName,progressMessage,errorMessage) {
 	try {
 		var macroCode = "";
 		var e = "";
@@ -156,19 +158,20 @@ var unenrollInCourseID = function(bb9_courseID,userName) {
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
 		e = iimPlay("CODE:" + macroCode);
 	} catch(err) {
-		alert(err.message);
+	    errorMessage += "\tunenrollInCourseID() says: "+err.message+"\n";
 	}
 }
 
-var pauseMacro = function() {
+var pauseMacro = function(progressMessage,errorMessage) {
     try {
 		var macroCode = "";
 		var e = "";	
 		
 		macroCode = "PAUSE\n";
 		e = iimPlay("CODE:" + macroCode);
+		progressMessage += "Paused\n";
     } catch(err) {
-		alert(err.message);
+	    errorMessage += "\tpauseMacro() says: "+err.message+"\n";
 	}
 }
 
