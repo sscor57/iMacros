@@ -3,17 +3,19 @@ var controlFlow = function() {
         var bb9_courseID = null;
         var userName = null;
 		var userCourse = new Array;
+        var progressMessage = "";
+        var errorMessage = "";
         
-        userCourse = goToCourseID(bb9_courseID,userName);
+        userCourse = goToCourseID(bb9_courseID,userName,progressMessage,errorMessage);
         pauseMacro();
-        unenrollInCourseID(userCourse[0],userCourse[1]);
+        unenrollInCourseID(userCourse[0],userCourse[1],progressMessage,errorMessage);
     } catch(err) {
 		alert(err.message);
     }
 }
 
 // navigates via the course search feature to the specified course id
-var goToCourseID = function(bb9_courseID,userName) {
+var goToCourseID = function(bb9_courseID,userName,progressMessage,errorMessage) {
     try {
 		var macroCode = "";
 		var e = "";
@@ -60,7 +62,7 @@ var goToCourseID = function(bb9_courseID,userName) {
 	}
 }
 
-var enrollInCourseID = function(userName,role) {
+var enrollInCourseID = function(userName,role,progressMessage,errorMessage) {
 	try {
 		var macroCode = "";
 		var e = "";
