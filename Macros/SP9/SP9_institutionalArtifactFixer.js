@@ -436,8 +436,12 @@ var fixPrintArtifact = function() {
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_"+contextualMenuIdNumber+"\n";
-        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:the_form ATTR=ID:htmlData_text CONTENT="+institutionalArtifact("OOB_Print.html")+"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:htmlData_text_code\n";
+        macroCode = "TAB T=2\nFRAME F=0\n";
+        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT="+institutionalArtifact("OOB_Print.html")+"\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+        
+        macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:top_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);	
 		
