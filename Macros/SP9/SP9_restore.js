@@ -19,7 +19,7 @@ var addAssignment = function(unitNum, assignmentInfo) {
     var artifact= "";
 
     try {
-        contentType = assignmentInfo[0]
+        contentType = assignmentInfo[0];
         xID = assignmentInfo[1];
         fileName = assignmentInfo[2];
         linkTitle = assignmentInfo[3];
@@ -91,7 +91,7 @@ var addDiscussion = function(unitNum, discussionInfo) {
         e = iimPlay("CODE:" + macroCode);
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://coursebuilda.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
+        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
         macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces(artifact) + "\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
