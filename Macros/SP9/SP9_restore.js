@@ -4,7 +4,7 @@ var bb9_courseID = null;
 var numberOfUnits = 0;
 var numberOfProjects = 0;
 var courseID = null;
-var userName = "cswope";
+var userName = null;
     
 var addAssignment = function(unitNum, assignmentInfo) {
     var macroCode = "";
@@ -23,7 +23,7 @@ var addAssignment = function(unitNum, assignmentInfo) {
         xID = assignmentInfo[1];
         fileName = assignmentInfo[2];
         linkTitle = assignmentInfo[3];
-        artifact = assignmentInfo[4];
+        artifact = "<div class=\"capellaDrawer\">" + assignmentInfo[4] + "</div>";
         activityCode = fileName.match(/u\d{2}a\d{1,2}/)[0];
         assignmentNum = activityCode.match(/u\d{2}a(\d{1,2})/)[1];
         title = "[" + activityCode + "] Unit " + unitNum + " Assignment " + assignmentNum;
@@ -92,7 +92,7 @@ var addDiscussion = function(unitNum, discussionInfo) {
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces(artifact) + "\n";
+        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" +artifact + "</div>") + "\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
                 
