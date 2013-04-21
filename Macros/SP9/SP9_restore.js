@@ -69,33 +69,40 @@ var addDiscussion = function(unitNum, discussionInfo) {
         xID = discussionInfo[1];
         fileName = discussionInfo[2];
         linkTitle = discussionInfo[3];
-        artifact = discussionInfo[4];
+        artifact = "<div class=\"capellaDrawer\">" + discussionInfo[4] + "</div>";
         
         activityCode = fileName.match(/u\d{2}d\d{1,2}/)[0];
         discussionNum = activityCode.match(/u\d{2}d(\d{1,2})/)[1];
+        title = "[" + activityCode + "] Unit " + unitNum + " Discussion " + discussionNum
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Tools\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Discussion<SP>Board\n";
-        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:addItemFormId ATTR=ID:rTool_1\n";
-        macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:itemId EXTRACT=HTM\n";
-        e = iimPlay("CODE:" + macroCode);
-		extract = iimGetLastExtract();
-		
-		pattern = "_(\\d+?)_1\">\\[";
-		pattern += activityCode;
-		
-        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:addItemFormId ATTR=ID:rTool_1\n";
-        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:addItemForm ATTR=ID:itemId CONTENT=%_" + extract.match(pattern)[1] + "_1\n";
-        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Create<SP>New<SP>Forum\n";
         e = iimPlay("CODE:" + macroCode);
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:title CONTENT=" + addIIMSpaces(title) + "\n";
+        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://coursebuilda.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
+        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:forumForm ATTR=ID:descriptiontext CONTENT=" + addIIMSpaces(artifact) + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorRemove CONTENT=YES\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:isRemoveAllmsgs_false\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorModify CONTENT=YES\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:allow1\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:include1\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:gradeForum\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:possiblePoints CONTENT=100\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:counterEnableActivityCounterData CONTENT=NO\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+        e = iimPlay("CODE:" + macroCode);
+
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
         macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
         macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" +artifact + "</div>") + "\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
-                
+        
         progressMessage += title + ": Added.";
     } catch(err) {
         errorMessage += "Errors occured:\n";
@@ -109,13 +116,13 @@ var unitOperations = function(unitNum, contentInfo) {
     var unitInfo = [];
     var assignments = [];
     var discussions = [];
+    
     var getTitleNumber = function(celesteFileName) {
         num = celesteFileName.match(/u(\d{2})|unit(\d{2})/)[1];
         if (num < 10) {
             num++;
             num--;
         }
-        
         return num
     }
     
@@ -156,7 +163,6 @@ var unitOperations = function(unitNum, contentInfo) {
         for (j = 0; j < discussions.length; j++) {
             addDiscussion(unitNum, discussions[j]);
         }
-        
     } catch(err) {
         errorMessage += err.message + "\n";
         if (errorMessage != "Errors occured:\n") {
@@ -308,6 +314,13 @@ var templateInfo = function() {
 		e = iimPlay("CODE:" + macroCode);
 		extract = iimGetLastExtract();
 	
+		macroCode = "TAB T=1\nFRAME F=2\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Teaching<SP>Style\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=ID:textOnlyView\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=ID:applyAllContentAreas CONTENT=YES\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+		e = iimPlay("CODE:" + macroCode);
+		
 		lnavItems = extract.match(/<li.+?<\/li>/g);
 	
 		for (i = 0; i < lnavItems.length; i++) {

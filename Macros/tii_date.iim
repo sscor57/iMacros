@@ -1,0 +1,12 @@
+﻿TAB T=1
+FRAME F=11
+TAG POS=1 TYPE=SPAN ATTR=ID:display_due_date
+TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11
+TAG POS=1 TYPE=A ATTR=TXT:>>
+TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11
+TAG POS=1 TYPE=A ATTR=TXT:>>
+TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11
+TAG POS=1 TYPE=A ATTR=TXT:31
+TAG POS=1 TYPE=IMG ATTR=SRC:https://ne.edgecastcdn.net/800404/www.turnitin.com/image_bin/icons/cms/turnitin/small_16/expand.gif
+TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit
+TAG POS=1 TYPE=IMG ATTR=SRC:http://qasa.capella.edu/common/ok_off.gif?course_id=_2112_1
