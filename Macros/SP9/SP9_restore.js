@@ -398,7 +398,7 @@ var goToCourseID = function(bb9_courseID, userName) {
         e = iimPlay("CODE:" + macroCode);
 		
 		if (userName === null) {
-		    userName = prompt("Enter your username", "cswope");
+		    userName = prompt("Enter your username", "username");
 		}
         
         enrollInCourseID(userName, "C");
