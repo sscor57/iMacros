@@ -94,7 +94,7 @@ var addDiscussion = function(unitNum, discussionInfo) {
         xID = discussionInfo[1];
         fileName = discussionInfo[2];
         linkTitle = discussionInfo[3];
-        artifact = "<div class=\"capellaDrawer\">" + discussionInfo[4] + "</div>";
+        artifact = discussionInfo[4];
         
         activityCode = fileName.match(/u\d{2}d\d{1,2}/)[0];
         discussionNum = activityCode.match(/u\d{2}d(\d{1,2})/)[1];
@@ -135,14 +135,108 @@ var addDiscussion = function(unitNum, discussionInfo) {
         alert(errorMessage);
     }
 }
+    
+var addUngradedDiscussion = function(discussionInfo) {
+    var macroCode = "";
+    var e = 1;
+    var i = 0;
+    var contentType = 0;
+    var xID = "";
+    var fileName = "";
+    var linkTitle = "";
+    var artifact = "";
+    var discussionTopics = [];
+    var buildAYI = false;
+    var discID = "";
+    
+    var buildDiscussion = function(linkTitle, artifact) {
+    	macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Create<SP>New<SP>Forum\n";
+		e = iimPlay("CODE:" + macroCode);
+
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:title CONTENT=" + linkTitle + "\n";
+		macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:forumForm ATTR=ID:descriptiontext CONTENT=" + artifact + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorRemove CONTENT=YES\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorModify CONTENT=YES\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:allow2\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:include1\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:nograde\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+		e = iimPlay("CODE:" + macroCode);
+
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
+		macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + artifact + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+		e = iimPlay("CODE:" + macroCode);
+    }
+
+    try {
+        contentType = discussionInfo[0];
+        xID = discussionInfo[1];
+        fileName = discussionInfo[2];
+        linkTitle = addIIMSpaces(discussionInfo[3]);
+        artifact = addIIMSpaces("<div class=\"capellaDrawer\">" + discussionInfo[4] + "</div>");
+
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Tools\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Discussion<SP>Board\n";
+		e = iimPlay("CODE:" + macroCode);
+
+		if (xID != 1212) {
+			buildDiscussion(linkTitle, artifact);
+		} else {
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";        
+			macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:itemID EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);            
+			extract = iimGetLastExtract();
+			
+			if (extract.search(/Ask Your Instructor/) === -1) {
+				buildDiscussion(linkTitle, artifact);
+			} else {
+				discussionTopics = extract.match(/<option[\s\S]+?<\/option>/g);
+				
+				for (i = 0; i <discussionTopics.length; i++) {
+					if (discussionTopics[i].search(/Ask Your Instructor/) != -1) {
+						discID = discussionTopics[i].match(/_\d+?_1/);
+					
+						macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";        
+						macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:addItemFormId ATTR=ID:rTool_1\n";
+						macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:addItemForm ATTR=ID:itemId CONTENT=%" + discID + "\n";
+						macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
+						e = iimPlay("CODE:" + macroCode);  
+					
+						macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";        
+						macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
+						macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + artifact + "\n";
+						macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+						e = iimPlay("CODE:" + macroCode);            
+					}
+				}
+			}
+		}
+		        
+        progressMessage += linkTitle + ": Added.";
+    } catch(err) {
+        errorMessage += "Errors occured:\n";
+        errorMessage += err + "\n";
+        alert(errorMessage);
+    }
+}
 
 var unitOperations = function(unitNum, contentInfo) {
     var j = 0;
     var unitInfo = [];
     var assignments = [];
     var discussions = [];
+    var discussionInfo = [];
     
     var getTitleNumber = function(celesteFileName) {
+    	var num = "";
+    	
         num = celesteFileName.match(/u(\d{2})|unit(\d{2})/)[1];
         if (num < 10) {
             num++;
@@ -168,6 +262,7 @@ var unitOperations = function(unitNum, contentInfo) {
     
     var artifactByContentType = function(contentType, unitInfo) {
         var artifactList = [];
+        
         for (j = 0; j < unitInfo.length; j++) {
             if (unitInfo[j][0] == contentType) {
                 artifactList.push(unitInfo[j]);
@@ -188,6 +283,12 @@ var unitOperations = function(unitNum, contentInfo) {
         for (j = 0; j < discussions.length; j++) {
             addDiscussion(unitNum, discussions[j]);
         }
+		
+		discussionInfo = [6, 1211, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1211_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
+		addUngradedDiscussion(discussionInfo)
+		
+		discussionInfo = [6, 1212, "ask_your_instructor.html", "Ask Your Instructor", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1212_1\" target=\"_blank\" alt=\"\">ask_your_instructor.html</a>"];
+		addUngradedDiscussion(discussionInfo)
     } catch(err) {
         errorMessage += err.message + "\n";
         if (errorMessage != "Errors occured:\n") {
@@ -239,7 +340,7 @@ var xIDs = function() {
 				contentType = 4;
 				fileName = rowsToScan[i].match(/u\d{2}s\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://cbsa.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -248,7 +349,7 @@ var xIDs = function() {
 				contentType = 5;
 				fileName = rowsToScan[i].match(/u\d{2}a\d{1,2}\.html/)[0];
 				linkTitle = "View Assignment Instructions";
-				artifact = "<a target=\"_blank\" href=\"http://cbsa.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -257,7 +358,7 @@ var xIDs = function() {
 				contentType = 6;
 				fileName = rowsToScan[i].match(/u\d{2}d\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://cbsa.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -279,7 +380,7 @@ var currentUnit = function() {
         throw e;
     }
     
-    folderTitle = extract.match(/Getting Started|Course Project(?: \d)*?|Unit \d{1,2}/);
+    folderTitle = extract.match(/Getting Started|Syllabus|Course Project(?: \d)*?|Unit \d{1,2}/);
     return folderTitle
 }
 
@@ -290,8 +391,36 @@ var cycleThroughUnits = function() {
     var macroCode = "";
     var e = 0;
 	var contentInfo = xIDs();
+	var discussionInfo = [];
 
 	try {
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Getting<SP>Started\n";
+		e = iimPlay("CODE:" + macroCode);
+		
+		discussionInfo = [6, 1210, "welcome_and_introductions.html", "Welcome and Introductions", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1210_1\" target=\"_blank\" alt=\"\">welcome_and_introductions.html</a>"];
+		addUngradedDiscussion(discussionInfo)
+		
+		discussionInfo = [6, 1227, "faculty_expectations.html", "Faculty Expectations", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1227_1\" target=\"_blank\" alt=\"\">faculty_expectations.html</a>"];
+		addUngradedDiscussion(discussionInfo)
+		
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
+		e = iimPlay("CODE:" + macroCode);
+		
+		i = 1;
+		while (i <= numberOfProjects) {
+			lnavProjectName = "Course Project " + i
+			if (lnavProjectName === "Course Project 1") {
+				lnavProjectName = "Course Project"
+			}
+			lnavProjectName = addIIMSpaces(lnavProjectName)
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + lnavProjectName + "\n";
+			e = iimPlay("CODE:" + macroCode);
+			i++;
+		}
+		
 		i = 1;
 		while (i <= numberOfUnits) {
 			lnavUnitName = addIIMSpaces("Unit " + i);
