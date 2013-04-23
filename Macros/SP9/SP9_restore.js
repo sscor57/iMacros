@@ -5,10 +5,34 @@ var numberOfUnits = 0;
 var numberOfProjects = 0;
 var courseID = null;
 var userName = null;
+
+var editModeON = function() {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
     
+    try{
+		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		
+		editMode = extract.match(/>([OFN]*)</)[1];
+		
+		if (editMode === "ON") {
+		    return
+		} else {
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText\n";
+            e = iimPlay("CODE:" + macroCode);
+		}
+    } catch(err) {
+        alert(err + " detectEditMode is having problems.");
+    }
+}
+
 var addAssignment = function(unitNum, assignmentInfo) {
     var macroCode = "";
-    var e = 1;
     var activityCode = "";
     var assignmentNum = "";
     var title = "";
@@ -24,6 +48,7 @@ var addAssignment = function(unitNum, assignmentInfo) {
         fileName = assignmentInfo[2];
         linkTitle = assignmentInfo[3];
         artifact = "<div class=\"capellaDrawer\">" + assignmentInfo[4] + "</div>";
+        
         activityCode = fileName.match(/u\d{2}a\d{1,2}/)[0];
         assignmentNum = activityCode.match(/u\d{2}a(\d{1,2})/)[1];
         title = "[" + activityCode + "] Unit " + unitNum + " Assignment " + assignmentNum;
@@ -295,7 +320,9 @@ var templateInfo = function() {
     var projects = [];
 
 	try {
-		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+	    editModeON();
+	    
+	    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.customization_groupExpanderLink\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Properties\n";
 		e = iimPlay("CODE:" + macroCode);
