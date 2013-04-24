@@ -22,12 +22,13 @@ var editModeON = function() {
 		if (editMode === "ON") {
 		    return
 		} else {
-            macroCode = "TAB T=1\nFRAME F=2\n";
+		    macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText\n";
             e = iimPlay("CODE:" + macroCode);
+            progressMessage += "Turned on edit mode.\n";
 		}
     } catch(err) {
-        alert(err + " detectEditMode is having problems.");
+        alert(err + " editModeON is having problems.");
     }
 }
 
@@ -65,12 +66,9 @@ var addAssignment = function(unitNum, assignmentInfo) {
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manageAssignmentForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
 
-        progressMessage += title + ": Added.";
+        progressMessage += title + ": added\n";
     } catch(err) {
-        errorMessage += err.message + "\n";
-        if (errorMessage != "Errors occured:\n") {
-            alert(err.message);
-        }
+        alert(err + " addAssignment is having problems.");
     }
 }
     
@@ -98,7 +96,7 @@ var addDiscussion = function(unitNum, discussionInfo) {
         
         activityCode = fileName.match(/u\d{2}d\d{1,2}/)[0];
         discussionNum = activityCode.match(/u\d{2}d(\d{1,2})/)[1];
-        title = "[" + activityCode + "] Unit " + unitNum + " Discussion " + discussionNum
+        title = "[" + activityCode + "] Unit " + unitNum + " Discussion " + discussionNum;
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Tools\n";
@@ -128,11 +126,9 @@ var addDiscussion = function(unitNum, discussionInfo) {
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
         
-        progressMessage += title + ": Added.";
+        progressMessage += title + ": added\n";
     } catch(err) {
-        errorMessage += "Errors occured:\n";
-        errorMessage += err + "\n";
-        alert(errorMessage);
+        alert(err + " addDiscussion is having problems.");
     }
 }
     
@@ -219,11 +215,9 @@ var addUngradedDiscussion = function(discussionInfo) {
 			}
 		}
 		        
-        progressMessage += linkTitle + ": Added.";
+        progressMessage += removeIIMSpaces(linkTitle) + ": added\n";
     } catch(err) {
-        errorMessage += "Errors occured:\n";
-        errorMessage += err + "\n";
-        alert(errorMessage);
+        alert(err + " addUngradedDiscussion is having problems.");
     }
 }
 
@@ -251,8 +245,6 @@ var unitOperations = function(unitNum, contentInfo) {
         
         for (j = 0; j < contentInfo.length; j++) {
             titleNumber = getTitleNumber(contentInfo[j][2]);
-            titleNumber++;
-            titleNumber--;
             if (unitNum == titleNumber) {
                 unitInfo.push(contentInfo[j]);
             }
@@ -285,15 +277,12 @@ var unitOperations = function(unitNum, contentInfo) {
         }
 		
 		discussionInfo = [6, 1211, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1211_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
-		addUngradedDiscussion(discussionInfo)
+		addUngradedDiscussion(discussionInfo);
 		
 		discussionInfo = [6, 1212, "ask_your_instructor.html", "Ask Your Instructor", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1212_1\" target=\"_blank\" alt=\"\">ask_your_instructor.html</a>"];
-		addUngradedDiscussion(discussionInfo)
+		addUngradedDiscussion(discussionInfo);
     } catch(err) {
-        errorMessage += err.message + "\n";
-        if (errorMessage != "Errors occured:\n") {
-            alert(err.message);
-        }
+        alert(err + " unitOperations is having problems.");
     }
 }
 
@@ -321,16 +310,18 @@ var xIDs = function() {
         macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:catForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Authors\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Name\n";
         macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
         macroCode += "TAB T=1\n";
         macroCode += "TAB T=2\n";
         macroCode += "TAB CLOSE\n";
-		e = iimPlay("CODE:" + macroCode);
+		e = iimPlay("CODE:" + macroCode);		
+		extract = iimGetLastExtract();
 		if (e != 1) {
 		    throw e;
 		}
-		
-		extract = iimGetLastExtract();
+
 		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
 		
 		for (i = 0; i < rowsToScan.length; i++) {
@@ -366,22 +357,9 @@ var xIDs = function() {
 		
 		progressMessage += "";
 		return contentInfo
-	} catch (err) {
-		alert(err);
-	}
-}
-    
-var currentUnit = function() {
-    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";        
-    macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:pageTitleDiv EXTRACT=HTM\n";
-    e = iimPlay("CODE:" + macroCode);            
-    extract = iimGetLastExtract();
-    if (e != 1) {
-        throw e;
+    } catch(err) {
+        alert(err + " xIDs is having problems.");
     }
-    
-    folderTitle = extract.match(/Getting Started|Syllabus|Course Project(?: \d)*?|Unit \d{1,2}/);
-    return folderTitle
 }
 
 var cycleThroughUnits = function() {
@@ -392,52 +370,61 @@ var cycleThroughUnits = function() {
     var e = 0;
 	var contentInfo = xIDs();
 	var discussionInfo = [];
+	
+	var lnavButtonClick = function(button) {
+	    button = addIIMSpaces(button);
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + button + "\n";
+		e = iimPlay("CODE:" + macroCode);
+	}
 
 	try {
-		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Getting<SP>Started\n";
-		e = iimPlay("CODE:" + macroCode);
+	    // begin Getting Started		
+		progressMessage += "Getting Started Operations:\n";
+		lnavButtonClick("Getting Started");
 		
 		discussionInfo = [6, 1210, "welcome_and_introductions.html", "Welcome and Introductions", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1210_1\" target=\"_blank\" alt=\"\">welcome_and_introductions.html</a>"];
-		addUngradedDiscussion(discussionInfo)
+		addUngradedDiscussion(discussionInfo);
 		
 		discussionInfo = [6, 1227, "faculty_expectations.html", "Faculty Expectations", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1227_1\" target=\"_blank\" alt=\"\">faculty_expectations.html</a>"];
-		addUngradedDiscussion(discussionInfo)
+		addUngradedDiscussion(discussionInfo);
+		// end Getting Started
 		
+		// begin Syllabus	
+		progressMessage += "Syllabus Operations:\n";
 		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
 		e = iimPlay("CODE:" + macroCode);
+		// end Syllabus
 		
+		// begin Course Project(s)
 		i = 1;
 		while (i <= numberOfProjects) {
-			lnavProjectName = "Course Project " + i
+			lnavProjectName = "Course Project " + i	
+		    progressMessage += lnavProjectName + " Operations:\n";
 			if (lnavProjectName === "Course Project 1") {
-				lnavProjectName = "Course Project"
+				lnavProjectName = "Course Project";
 			}
-			lnavProjectName = addIIMSpaces(lnavProjectName)
-			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-			macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + lnavProjectName + "\n";
-			e = iimPlay("CODE:" + macroCode);
+			lnavButtonClick(lnavProjectName);
 			i++;
 		}
+		// end Course Projects
 		
+		// begin Units
 		i = 1;
 		while (i <= numberOfUnits) {
 			lnavUnitName = addIIMSpaces("Unit " + i);
-			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-			macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + lnavUnitName + "\n";
-			e = iimPlay("CODE:" + macroCode);
+			progressMessage += removeIIMSpaces(lnavUnitName) + " Operations:\n";
+			lnavButtonClick(lnavUnitName);
 			unitOperations(i, contentInfo);
 			i++;
 		}
+		// end Units
 		
-		progressMessage += "";
-	} catch (err) {
-		errorMessage += err.message + "\n";
-		if (errorMessage != "Errors occured:\n") {
-			alert(err.message);
-		}
-	}
+		progressMessage += "Content areas are set up.\n";
+    } catch(err) {
+        alert(err + " cycleThroughUnits is having problems.");
+    }
 }
 
 var templateInfo = function() {
@@ -472,10 +459,23 @@ var templateInfo = function() {
 	
 		macroCode = "TAB T=1\nFRAME F=2\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Teaching<SP>Style\n";
+		e = iimPlay("CODE:" + macroCode);
+		
+		if (e === -921) {
+            macroCode = "TAB T=1\nFRAME F=2\n";
+		    macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.customization_groupExpanderLink\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Teaching<SP>Style\n";
+            e = iimPlay("CODE:" + macroCode);
+		}
+	
+		macroCode = "TAB T=1\nFRAME F=2\n"; 
         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=ID:textOnlyView\n";
         macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=ID:applyAllContentAreas CONTENT=YES\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
-		e = iimPlay("CODE:" + macroCode);
+        e = iimPlay("CODE:" + macroCode);
+        if (e == 1) {
+            progressMessage += "Icons are turned off.\n";
+        }
 		
 		lnavItems = extract.match(/<li.+?<\/li>/g);
 	
@@ -494,14 +494,9 @@ var templateInfo = function() {
 		}
 	
 		numberOfProjects = projects.length;
-		
-		progressMessage += "";
-	} catch (err) {
-		errorMessage += err.message + "\n";
-		if (errorMessage != "Errors occured:\n") {
-			alert(err.message);
-		}
-	}
+    } catch(err) {
+        alert(err + " templateInfo is having problems.");
+    }
 }
 
 // navigates via the course search feature to the specified course id
@@ -527,7 +522,7 @@ var goToCourseID = function(bb9_courseID, userName) {
         e = iimPlay("CODE:" + macroCode);
 		
 		if (userName === null) {
-		    userName = prompt("Enter your username", "username");
+		    userName = prompt("Enter your username", userName);
 		}
         
         enrollInCourseID(userName, "C");
@@ -544,14 +539,9 @@ var goToCourseID = function(bb9_courseID, userName) {
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
             e = iimPlay("CODE:" + macroCode);
         }
-		
-		progressMessage += "";
-	} catch (err) {
-		errorMessage += err.message + "\n";
-		if (errorMessage != "Errors occured:\n") {
-			alert(err.message);
-		}
-	}
+    } catch(err) {
+        alert(err + " goToCourseID is having problems.");
+    }
 }
 
 var enrollInCourseID = function(userName, role) {
@@ -579,18 +569,18 @@ var enrollInCourseID = function(userName, role) {
 			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
 			e = iimPlay("CODE:" + macroCode);			
 			
-			progressMessage += "Enrolled " + userName + " in:\t";
+			progressMessage += "Enrolled " + userName + " in: " + bb9_courseID + "\n";
 			return true
 		} else if (extract.search(userName) != -1) {
-			progressMessage += userName + " is already enrolled in:\t";
+			progressMessage += userName + " is already enrolled in: " + bb9_courseID + "\n";
 			return true
 		} else {
-			progressMessage += "Failed to enroll" + userName + ".";
+			progressMessage += "Failed to enroll" + userName + "\n";
 			return false
 		}
-	} catch(err) {
-		alert(err.message);
-	}
+    } catch(err) {
+        alert(err + " enrollInCourseID is having problems.");
+    }
 }
 
 var unenrollInCourseID = function(templateID) {
@@ -641,18 +631,13 @@ var unenrollInCourseID = function(templateID) {
                 macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
                 macroCode += "TAG POS=1 TYPE=A ATTR=ID:deleteItem_" + contextualMenuIdNumber + "\n";
                 e = iimPlay("CODE:" + macroCode);
-                
-                progressMessage += "Un-enrolled from:\t" + templateID + ".\n";
             }
         }
 		
-		progressMessage += "";
-	} catch (err) {
-		errorMessage += err.message + "\n";
-		if (errorMessage != "Errors occured:\n") {
-			alert(err.message);
-		}
-	}
+		progressMessage += "Un-enrolled " + userName + " from: " + templateID + ".\n";
+    } catch(err) {
+        alert(err + " unenrollInCourseID is having problems.");
+    }
 }
 
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>')
@@ -676,5 +661,5 @@ unenrollInCourseID(bb9_courseID)
 
 macroCode = "TAB T=1\nFRAME F=2\n";
 macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
-macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n"; // TEMPLATE_PS4105_00002
+macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
 e = iimPlay("CODE:" + macroCode);
