@@ -4,7 +4,7 @@ var bb9_courseID = null;
 var numberOfUnits = 0;
 var numberOfProjects = 0;
 var courseID = null;
-var userName = null;
+var userName = "cswope";
 
 // checks if edit mode is on. if it's not it turns it on.
 var editModeON = function() {
@@ -37,6 +37,41 @@ var editModeON = function() {
 		}
     } catch(err) {
         alert(err + " editModeON is having problems.");
+    }
+}
+
+// adds the Course Updates page area to the leftNav.
+var courseUpdates = function() {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    var contextualMenuIdNumber = "";
+    
+    try{
+		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "TAG POS=1 TYPE=LI ATTR=ID:addCmItem EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		
+		contextualMenuIdNumber = extract.match(/cmlink_(\w{32})/)[1];
+		
+		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:addModulePageButton\n";
+		macroCode += "TAG POS=1 TYPE=INPUT ATTR=ID:addModulePageName CONTENT=Course<SP>Updates\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=ACTION:/webapps/blackboard/execute/course/addtoc ATTR=ID:module_page_availability_ckbox CONTENT=YES\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=ACTION:/webapps/blackboard/execute/course/addtoc ATTR=ID:module_page_availability_ckbox CONTENT=YES\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ACTION:/webapps/blackboard/execute/course/addtoc ATTR=ID:addModulePageFormSubmit\n";
+		e = iimPlay("CODE:" + macroCode);
+		
+		alert("You need to move the cursor in the text input to make the submit button active.");
+		
+		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "PAUSE\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ACTION:/webapps/blackboard/execute/course/addtoc ATTR=ID:addModulePageFormSubmit\n";
+		e = iimPlay("CODE:" + macroCode);
+		
+    } catch(err) {
+        alert(err + " courseUpdates is having problems.");
     }
 }
 
@@ -596,6 +631,7 @@ var templateInfo = function() {
     var lnavItems = [];
     var units = [];
     var projects = [];
+    var courseUpdatesID = "";
 
 	try {
 	    editModeON();
@@ -630,7 +666,7 @@ var templateInfo = function() {
             e = iimPlay("CODE:" + macroCode);
 		}
 	
-		macroCode = "TAB T=1\nFRAME F=2\n"; 
+		macroCode = "TAB T=1\nFRAME F=2\n";
         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=ID:textOnlyView\n";
         macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=ID:applyAllContentAreas CONTENT=YES\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ACTION:manageCourseDesign?cmd=save&course_id=_*_1 ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
@@ -969,6 +1005,7 @@ var celesteDataCapture = function(courseID) {
     var subMenu = "";
     var components = [];
     var projectComponents = [];
+    var unitNum = "";
     
 	try {
 	    macroCode = "TAB OPEN\n";
@@ -1005,6 +1042,8 @@ var celesteDataCapture = function(courseID) {
         
         for (i = 0; i < unitTitles.length; i++) {
             unitTitles[i] = unitTitles[i].replace(/<h3>/, "");
+            unitNum = unitTitles[i].match(/Unit \d{1,2}/);
+            unitTitles[i] = unitTitles[i].replace(/Unit \d{1,2} -/, unitNum);
         }
         
         celesteData.push(unitTitles);
