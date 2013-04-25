@@ -6,6 +6,7 @@ var numberOfProjects = 0;
 var courseID = null;
 var userName = null;
 
+// checks if edit mode is on. if it's not it turns it on.
 var editModeON = function() {
     var macroCode = "";
     var e = 0;
@@ -16,6 +17,9 @@ var editModeON = function() {
 		macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText EXTRACT=HTM\n";
 		e = iimPlay("CODE:" + macroCode);
 		extract = iimGetLastExtract();
+        if (e != 1) {
+            throw "Failed to extract Edit Mode status.";
+        }
 		
 		editMode = extract.match(/>([OFN]*)</)[1];
 		
@@ -25,13 +29,18 @@ var editModeON = function() {
 		    macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText\n";
             e = iimPlay("CODE:" + macroCode);
+            if (e != 1) {
+                throw "Failed to turn on Edit Mode.";
+            }
             progressMessage += "Turned on edit mode.\n";
+		    return
 		}
     } catch(err) {
         alert(err + " editModeON is having problems.");
     }
 }
 
+// adds an assignment.
 var addAssignment = function(unitNum, assignmentInfo) {
     var macroCode = "";
     var activityCode = "";
@@ -40,8 +49,8 @@ var addAssignment = function(unitNum, assignmentInfo) {
     var contentType = 0;
     var xID = "";
     var fileName = "";
-    var linkTitle= "";
-    var artifact= "";
+    var linkTitle = "";
+    var artifact = "";
 
     try {
         contentType = assignmentInfo[0];
@@ -65,17 +74,21 @@ var addAssignment = function(unitNum, assignmentInfo) {
         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manageAssignmentForm ATTR=ID:attemptTypeNum\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manageAssignmentForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong submitting " + activityCode +".";
+        }
 
         progressMessage += title + ": added\n";
+		return
     } catch(err) {
         alert(err + " addAssignment is having problems.");
     }
 }
-    
+
+// adds graded discussions if they have a activity code.
 var addDiscussion = function(unitNum, discussionInfo) {
     var macroCode = "";
     var e = 1;
-    var l = 0;
     var activityCode = "";
     var discussionNum = "";
     var title = "";
@@ -118,20 +131,28 @@ var addDiscussion = function(unitNum, discussionInfo) {
         macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:counterEnableActivityCounterData CONTENT=NO\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong submitting the form to create " + activityCode + ".";
+        }
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
         macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" +artifact + "</div>") + "\n";
+        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong adding " + activityCode + " in Unit " + unitNum;
+        }
         
         progressMessage += title + ": added\n";
+		return
     } catch(err) {
         alert(err + " addDiscussion is having problems.");
     }
 }
-    
+
+// adds discussions that are not included in the grading equation.
 var addUngradedDiscussion = function(discussionInfo) {
     var macroCode = "";
     var e = 1;
@@ -142,7 +163,6 @@ var addUngradedDiscussion = function(discussionInfo) {
     var linkTitle = "";
     var artifact = "";
     var discussionTopics = [];
-    var buildAYI = false;
     var discID = "";
     
     var buildDiscussion = function(linkTitle, artifact) {
@@ -161,6 +181,9 @@ var addUngradedDiscussion = function(discussionInfo) {
 		macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:nograde\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
 		e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong creating " + linkTitle + ".";
+        }
 
 		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
@@ -168,6 +191,9 @@ var addUngradedDiscussion = function(discussionInfo) {
 		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + artifact + "\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
 		e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong adding " + linkTitle + " to it's content area.";
+        }
     }
 
     try {
@@ -204,88 +230,32 @@ var addUngradedDiscussion = function(discussionInfo) {
 						macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:addItemForm ATTR=ID:itemId CONTENT=%" + discID + "\n";
 						macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
 						e = iimPlay("CODE:" + macroCode);  
+                        if (e != 1) {
+                            throw "Something went wrong selecting the right option for " + removeIIMSpaces(linkTitle) + ".";
+                        }
 					
 						macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";        
 						macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
 						macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + artifact + "\n";
 						macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
-						e = iimPlay("CODE:" + macroCode);            
+						e = iimPlay("CODE:" + macroCode);    
+                        if (e != 1) {
+                            throw "Something went wrong adding " + removeIIMSpaces(linkTitle) + ".";
+                        }         
 					}
 				}
 			}
 		}
 		        
         progressMessage += removeIIMSpaces(linkTitle) + ": added\n";
+		return
     } catch(err) {
         alert(err + " addUngradedDiscussion is having problems.");
     }
 }
 
-var unitOperations = function(unitNum, contentInfo) {
-    var j = 0;
-    var unitInfo = [];
-    var assignments = [];
-    var discussions = [];
-    var discussionInfo = [];
-    
-    var getTitleNumber = function(celesteFileName) {
-    	var num = "";
-    	
-        num = celesteFileName.match(/u(\d{2})|unit(\d{2})/)[1];
-        if (num < 10) {
-            num++;
-            num--;
-        }
-        return num
-    }
-    
-    var assembleUnitInfo = function(unitNum, contentInfo) {
-        var titleNumber = "";
-        var unitInfo = [];
-        
-        for (j = 0; j < contentInfo.length; j++) {
-            titleNumber = getTitleNumber(contentInfo[j][2]);
-            if (unitNum == titleNumber) {
-                unitInfo.push(contentInfo[j]);
-            }
-        }
-        return unitInfo
-    }
-    
-    var artifactByContentType = function(contentType, unitInfo) {
-        var artifactList = [];
-        
-        for (j = 0; j < unitInfo.length; j++) {
-            if (unitInfo[j][0] == contentType) {
-                artifactList.push(unitInfo[j]);
-            }
-        }
-        return artifactList
-    }
-    
-    try {
-        unitInfo = assembleUnitInfo(unitNum, contentInfo);
-        assignments = artifactByContentType(5, unitInfo);
-        discussions = artifactByContentType(6, unitInfo);
-        
-        for (j = 0; j < assignments.length; j++) {
-            addAssignment(unitNum, assignments[j]);
-        }
-        
-        for (j = 0; j < discussions.length; j++) {
-            addDiscussion(unitNum, discussions[j]);
-        }
-		
-		discussionInfo = [6, 1211, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1211_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
-		addUngradedDiscussion(discussionInfo);
-		
-		discussionInfo = [6, 1212, "ask_your_instructor.html", "Ask Your Instructor", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1212_1\" target=\"_blank\" alt=\"\">ask_your_instructor.html</a>"];
-		addUngradedDiscussion(discussionInfo);
-    } catch(err) {
-        alert(err + " unitOperations is having problems.");
-    }
-}
-
+// captures each Content Collection items data in an array ([contentType, xID, fileName, linkTitle, artifact])
+// returns a 3D array where each element is one CC items array of data.
 var xIDs = function() {
     var macroCode = "";
     var e = 0;
@@ -304,6 +274,7 @@ var xIDs = function() {
 		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:discoverObjectTypePicker CONTENT=%html\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Go\n";
+        macroCode += "WAIT SECONDS=2\n";
         macroCode += "TAB T=1\n";
         macroCode += "TAB T=2\n";
         macroCode += "FRAME F=0\n";
@@ -362,7 +333,29 @@ var xIDs = function() {
     }
 }
 
-var cycleThroughUnits = function() {
+// clicks on a left nav buttons title text.
+var lnavButtonClick = function(button) {
+    var macroCode = "";
+    e = 0;
+    var iimButton = "";
+
+	try {
+        iimButton = addIIMSpaces(button);
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + iimButton + "\n";
+        e = iimPlay("CODE:" + macroCode);
+        return
+    } catch(err) {
+        alert(err + " lnavButtonClick is having problems.");
+    }
+}
+
+/* 
+    clicks on each of content area left nav buttons. this controls operations to content 
+    areas, with the exception of Course Project and Unit areas, which have their own functions 
+    for that.
+*/
+var cycleThroughUnits = function(celesteData) {
     var i = 0;
     var xidList = [];
     var lnavUnitName = "";
@@ -370,13 +363,9 @@ var cycleThroughUnits = function() {
     var e = 0;
 	var contentInfo = xIDs();
 	var discussionInfo = [];
-	
-	var lnavButtonClick = function(button) {
-	    button = addIIMSpaces(button);
-		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + button + "\n";
-		e = iimPlay("CODE:" + macroCode);
-	}
+	var unitTitles = celesteData[0];
+	var projectTitles = celesteData[1];
+	var projectComponents = celesteData[2];
 
 	try {
 	    // begin Getting Started		
@@ -406,6 +395,7 @@ var cycleThroughUnits = function() {
 				lnavProjectName = "Course Project";
 			}
 			lnavButtonClick(lnavProjectName);
+			projectOperations(i, contentInfo, projectTitles[i - 1], projectComponents[i - 1]);
 			i++;
 		}
 		// end Course Projects
@@ -416,17 +406,189 @@ var cycleThroughUnits = function() {
 			lnavUnitName = addIIMSpaces("Unit " + i);
 			progressMessage += removeIIMSpaces(lnavUnitName) + " Operations:\n";
 			lnavButtonClick(lnavUnitName);
-			unitOperations(i, contentInfo);
+			unitOperations(i, contentInfo, unitTitles[i - 1]);
 			i++;
 		}
 		// end Units
 		
 		progressMessage += "Content areas are set up.\n";
+		return
     } catch(err) {
         alert(err + " cycleThroughUnits is having problems.");
     }
 }
 
+// adds all assignments, graded discussion topics, and the common ungraded discussions to unit content areas, in that order.
+var unitOperations = function(unitNum, contentInfo, unitTitle) {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    var j = 0;
+    var unitInfo = [];
+    var assignments = [];
+    var discussions = [];
+    var discussionInfo = [];
+    
+    var setUnitTitle = function(title) {
+        var macroCode = "";
+        var e = 0;
+        var extract = "";
+    	var num = "";
+    	var contentListItems = [];
+    	var contextualMenuIdNumber = "";
+    	
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=UL ATTR=ID:content_listContainer EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		
+		contentListItems = extract.match(/<li[\s\S]+?<\/li>/g);
+		contextualMenuIdNumber = contentListItems[1].match(/cmlink_(\w{32})/)[1];
+    	
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:the_form ATTR=ID:user_title CONTENT=" + addIIMSpaces(title) + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:top_Submit&&VALUE:Submit\n";
+		e = iimPlay("CODE:" + macroCode);
+    }
+    
+    var getTitleNumber = function(celesteFileName) {
+    	var num = "";
+    	
+        num = celesteFileName.match(/u(\d{2})|unit(\d{2})/)[1];
+        if (num < 10) {
+            num++;
+            num--;
+        }
+        return num
+    }
+    
+    var assembleUnitInfo = function(unitNum, contentInfo) {
+        var titleNumber = "";
+        var unitInfo = [];
+        
+        for (j = 0; j < contentInfo.length; j++) {
+            titleNumber = getTitleNumber(contentInfo[j][2]);
+            if (unitNum == titleNumber) {
+                unitInfo.push(contentInfo[j]);
+            }
+        }
+        return unitInfo
+    }
+    
+    var artifactByContentType = function(contentType, unitInfo) {
+        var artifactList = [];
+        
+        for (j = 0; j < unitInfo.length; j++) {
+            if (unitInfo[j][0] == contentType) {
+                artifactList.push(unitInfo[j]);
+            }
+        }
+        return artifactList
+    }
+    
+    try {
+        unitInfo = assembleUnitInfo(unitNum, contentInfo);
+        assignments = artifactByContentType(5, unitInfo);
+        discussions = artifactByContentType(6, unitInfo);
+        setUnitTitle(unitTitle);
+        
+        for (j = 0; j < assignments.length; j++) {
+            addAssignment(unitNum, assignments[j]);
+        }
+        
+        for (j = 0; j < discussions.length; j++) {
+            addDiscussion(unitNum, discussions[j]);
+        }
+		
+		discussionInfo = [6, 1211, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1211_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
+		addUngradedDiscussion(discussionInfo);
+		
+		discussionInfo = [6, 1212, "ask_your_instructor.html", "Ask Your Instructor", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1212_1\" target=\"_blank\" alt=\"\">ask_your_instructor.html</a>"];
+		addUngradedDiscussion(discussionInfo);
+		return
+    } catch(err) {
+        alert(err + " unitOperations is having problems.");
+    }
+}
+
+// add project titles, and project component assignment artifacts.
+var projectOperations = function(projectNum, contentInfo, projectTitle, components) {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    
+    var setProjectTitle = function(title) {
+        var macroCode = "";
+        var e = 0;
+        var extract = "";
+    	var contentListItems = [];
+    	var contextualMenuIdNumber = "";
+    	
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=UL ATTR=ID:content_listContainer EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		
+		contentListItems = extract.match(/<li[\s\S]+?<\/li>/g);
+		contextualMenuIdNumber = contentListItems[2].match(/cmlink_(\w{32})/)[1];
+    	
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:the_form ATTR=ID:user_title CONTENT=" + addIIMSpaces(title) + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:top_Submit&&VALUE:Submit\n";
+		e = iimPlay("CODE:" + macroCode);
+    }
+    
+    var addComponents = function(listOfCodes, contentInfo) {
+        var i = 0;
+        var j = 0;
+        var linkTitle = "";
+        var title = "";
+        
+        for (i = 0; i < listOfCodes.length; i++) {
+            titleInfo = listOfCodes[i].match(/u(\d{2})([ad])(\d{1,2})/);
+            
+            unitNum = titleInfo[1];
+            unitNum++;
+            unitNum--;
+            
+            if (titleInfo[2] == "a") {
+                type = "Assignment";
+            }
+            if (titleInfo[2] == "d") {
+                type = "Discussion";
+            }
+            
+            title = "[" + listOfCodes[i] + "] Unit " + unitNum + " " + type + " " + titleInfo[3];
+            for (j = 0; j < contentInfo.length; j++) {
+                if (contentInfo[j][2].search(listOfCodes[i]) != -1) {
+                    artifact = "<div class=\"capellaDrawer\">" + contentInfo[j][4] + "</div>";
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Build<SP>Content\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Item\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:the_form ATTR=ID:user_title CONTENT=" + addIIMSpaces(title) + "\n";
+                    macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
+                    macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:the_form ATTR=ID:htmlData_text CONTENT=" + addIIMSpaces(artifact) + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+        }
+    }
+    
+    try {
+        setProjectTitle(projectTitle);
+        addComponents(components, contentInfo);
+		return
+    } catch(err) {
+        alert(err + " projectOperations is having problems.");
+    }
+}
+
+// captures essential information like BB9 Course ID, number of units and projects.
 var templateInfo = function() {
     var macroCode = "";
     var e = 0;
@@ -494,12 +656,13 @@ var templateInfo = function() {
 		}
 	
 		numberOfProjects = projects.length;
+		return courseID
     } catch(err) {
         alert(err + " templateInfo is having problems.");
     }
 }
 
-// navigates via the course search feature to the specified course id
+// navigates via the course search feature to the specified course id.
 var goToCourseID = function(bb9_courseID, userName) {
     var macroCode = "";
     var e = "";
@@ -539,11 +702,13 @@ var goToCourseID = function(bb9_courseID, userName) {
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
             e = iimPlay("CODE:" + macroCode);
         }
+		return
     } catch(err) {
         alert(err + " goToCourseID is having problems.");
     }
 }
 
+// enrolls a specified user as a CP (if you know the values for other roles it can enroll as them too.)
 var enrollInCourseID = function(userName, role) {
     var macroCode = "";
     var e = "";
@@ -583,6 +748,7 @@ var enrollInCourseID = function(userName, role) {
     }
 }
 
+// unenrolls a specified user.
 var unenrollInCourseID = function(templateID) {
     var macroCode = "";
     var e = "";
@@ -635,29 +801,277 @@ var unenrollInCourseID = function(templateID) {
         }
 		
 		progressMessage += "Un-enrolled " + userName + " from: " + templateID + ".\n";
+		return
     } catch(err) {
         alert(err + " unenrollInCourseID is having problems.");
     }
 }
 
-// replaces a space character (' ') in a string with an iMacros space entity ('<SP>')
+// replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
 	newString = anyStringWithSpaces.replace(/ /g,"<SP>");
 	return newString
 }
 
-// replaces iMacros space entity ('<SP>') in a string with a space character (' ')
+// replaces iMacros space entity ('<SP>') in a string with a space character (' ').
 var removeIIMSpaces = function(anyStringWithIIMSpaces) {
     var newString = "";
 	newString = anyStringWithIIMSpaces.replace(/<SP>/g," ");
 	return newString
 }
 
-templateInfo();
+// controls all the gradebook setup operations.
+var gradebook = function() {
+    var macroCode = "";
+    var e = "";
+    var extract = "";
+    var gradingTableRows = [];
+    var i = 0;
+    var gradedDiscussions = [];
+    
+    var editSmartViews = function() {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contextualMenuIdNumber = "";
+        var smartViewRows = [];
+        
+        var extractSmartViewRows = function() {
+            var macroCode = "";
+            var e = "";
+            var extract = "";
+            var smartViewRows = [];
+            
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "WAIT SECONDS=2\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+        
+            smartViewRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            return smartViewRows
+        }
+        
+        try {
+            smartViewRows = extractSmartViewRows();
+            for (i = 0; i < smartViewRows.length; i++) {
+                if (smartViewRows[i].search(/>Assignments</) != - 1) {
+                    contextualMenuIdNumber = smartViewRows[i].match(/cmlink_(\w{32})/)[1];
+
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+                    macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:context_menu_tag_item1_" + contextualMenuIdNumber + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:AddModifyCustomViewsForm ATTR=ID:favoriteCbox CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:custom_view_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+        
+            smartViewRows = extractSmartViewRows();
+            for (i = 0; i < smartViewRows.length; i++) {
+                if (smartViewRows[i].search(/>Discussion Boards</) != - 1) {
+                    contextualMenuIdNumber = smartViewRows[i].match(/cmlink_(\w{32})/)[1];
+
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+                    macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:context_menu_tag_item1_" + contextualMenuIdNumber + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:name CONTENT=Discussions\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:AddModifyCustomViewsForm ATTR=ID:favoriteCbox CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:custom_view_form ATTR=NAME:top_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+        
+            smartViewRows = extractSmartViewRows();
+            for (i = 0; i < smartViewRows.length; i++) {
+                if (smartViewRows[i].search(/>Tests</) != - 1) {
+                    contextualMenuIdNumber = smartViewRows[i].match(/cmlink_(\w{32})/)[1];
+
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+                    macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:context_menu_tag_item1_" + contextualMenuIdNumber + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:name CONTENT=Quizzes\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:AddModifyCustomViewsForm ATTR=ID:favoriteCbox CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:custom_view_form ATTR=NAME:top_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+		
+            progressMessage += "\n";
+            return
+        } catch(err) {
+            alert(err + " editSmartView is having problems.");
+        }
+    }
+
+	try {
+        lnavButtonClick("Syllabus");
+        
+		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:activities_scoring_guide EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		
+		gradingTableRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+		
+		for (i = 0; i < gradingTableRows.length; i++) {
+		    if (gradingTableRows[i].search(/u\d{2}d\d{1,2}/) != - 1) {
+		        gradedDiscussions.push(gradingTableRows[i]);
+		    }
+		}
+
+        macroCode = "TAB T=1\nFRAME F=2\n";		
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.grade.center_groupExpanderLink\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Manage\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Smart<SP>Views\n";
+        e = iimPlay("CODE:" + macroCode);
+
+        macroCode = "TAB T=1\nFRAME F=2\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:manage_views_form ATTR=ID:listContainer_selectAll CONTENT=YES\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Favorites\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Remove<SP>from<SP>Favorites\n";
+        e = iimPlay("CODE:" + macroCode);
+        
+        editSmartViews();
+		
+		progressMessage += "\n";
+		return
+    } catch(err) {
+        alert(err + " gradebook is having problems.");
+    }
+}
+
+// captures data from Celeste. 
+var celesteDataCapture = function(courseID) {
+    var macroCode = "";
+    var e = "";
+    var extract = "";
+    var assignedRows = [];
+    var i = 0;
+    var linkID = "";
+    var unitTitles = [];
+    var projectTitles = [];
+    var celesteData = [];
+    var subMenu = "";
+    var components = [];
+    var projectComponents = [];
+    
+	try {
+	    macroCode = "TAB OPEN\n";
+	    macroCode += "TAB T=2\n";
+        macroCode += "URL GOTO=https://celeste.capella.edu\n";
+        alert("Log into Celeste and click Continue in your iMacros controls.");
+        macroCode += "PAUSE\n";
+        e = iimPlay("CODE:" + macroCode);
+        
+        macroCode = "TAG POS=1 TYPE=A ATTR=ID:assToMe_Nav\n";
+		macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dialogHolder EXTRACT=HTM\n";
+        e = iimPlay("CODE:" + macroCode);
+        extract = iimGetLastExtract();
+        
+        assignedRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+        for (i = 0; i < assignedRows.length; i++) {
+            if (assignedRows[i].search(courseID) != -1) {
+                linkID = assignedRows[i].match(/assToMeContentLink-\d+/);
+                
+                macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
+                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
+                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
+                e = iimPlay("CODE:" + macroCode);
+            }
+        }
+        
+		macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:courseUnitSummary EXTRACT=HTM\n";
+        e = iimPlay("CODE:" + macroCode);
+        extract = iimGetLastExtract();
+        
+        unitTitles = extract.match(/<h3>[\s\S]+?(?=<\/h3>)/g);
+        
+        for (i = 0; i < unitTitles.length; i++) {
+            unitTitles[i] = unitTitles[i].replace(/<h3>/, "");
+        }
+        
+        celesteData.push(unitTitles);
+        
+        macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:childMenuContent EXTRACT=HTM\n";
+        e = iimPlay("CODE:" + macroCode);
+        extract = iimGetLastExtract();
+        subMenu = extract.match(/<a href="#" onclick="">\s*Syllabus<\/a>\s*?(<ul>[\s\S]+?<\/ul>)/)[1];
+        projectTitles = subMenu.match(/Project: [\s\S]+?(?=<\/a>)/g);
+        
+        if (projectTitles === null) {
+            macroCode = "TAG POS=1 TYPE=A ATTR=TXT:Logout\n";
+            macroCode += "WAIT SECONDS=2\n";
+            macroCode += "TAB CLOSE\n";
+            e = iimPlay("CODE:" + macroCode);
+            if (e != 1) {
+                throw e;
+            }
+            return celesteData
+        }
+        
+        for (i = 0; i < projectTitles.length; i++) {
+            projectTitles[i] = projectTitles[i].replace(/Project: /, "");
+        }
+        
+        celesteData.push(projectTitles);
+        
+        for (i = 0; i < projectTitles.length; i++) {
+            components = [];
+            macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
+            macroCode += "WAIT SECONDS=1\n";
+            macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
+            macroCode += "WAIT SECONDS=1\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
+            macroCode += "WAIT SECONDS=1\n";
+            macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
+            macroCode += "WAIT SECONDS=1\n";
+            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            components = extract.match(/u\d{2}[ad]\d{1,2}/g);
+            projectComponents.push(components);
+        }
+        
+        celesteData.push(projectComponents);
+        
+        //macroCode = "PAUSE\n";
+        //e = iimPlay("CODE:" + macroCode);
+        
+        macroCode = "TAG POS=1 TYPE=A ATTR=TXT:Logout\n";
+        macroCode += "WAIT SECONDS=2\n";
+        macroCode += "TAB CLOSE\n";
+        e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw e;
+        }
+        
+		return celesteData
+    } catch(err) {
+        alert(err + " celesteDataCapture is having problems.");
+    }
+}
+
+courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
-cycleThroughUnits(); // edit unitOperations() to add/remove an operation
-unenrollInCourseID(bb9_courseID)
+cycleThroughUnits(celesteDataCapture(courseID)); // edit unitOperations() to add/remove an operation
+unenrollInCourseID(bb9_courseID);
 
 macroCode = "TAB T=1\nFRAME F=2\n";
 macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
