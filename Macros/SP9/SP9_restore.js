@@ -4,7 +4,7 @@ var bb9_courseID = null;
 var numberOfUnits = 0;
 var numberOfProjects = 0;
 var courseID = null;
-var userName = "cswope";
+var userName = null;
 
 // checks if edit mode is on. if it's not it turns it on.
 var editModeON = function() {
