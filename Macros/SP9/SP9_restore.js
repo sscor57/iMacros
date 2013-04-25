@@ -70,10 +70,15 @@ var courseUpdates = function() {
 		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ACTION:/webapps/blackboard/execute/course/addtoc ATTR=ID:addModulePageFormSubmit\n";
 		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Course<SP>Updates\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Add<SP>Course<SP>Module\n";
+		macroCode += "WAIT SECONDS=1\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:_64_1:_1_1addButton\n";
+		macroCode += "WAIT SECONDS=1\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:_1_1:_1_1addButton\n";
+		macroCode += "WAIT SECONDS=1\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:_209_1:-1addButton\n";
+		macroCode += "WAIT SECONDS=1\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:_66_1:_1_1addButton\n";
+		macroCode += "WAIT SECONDS=1\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
 		e = iimPlay("CODE:" + macroCode);
 		
@@ -117,7 +122,7 @@ var addAssignment = function(unitNum, assignmentInfo) {
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manageAssignmentForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
         e = iimPlay("CODE:" + macroCode);
         if (e != 1) {
-            throw "Something went wrong submitting " + activityCode +".";
+            throw "Something went wrong submitting " + activityCode + ".";
         }
 
         progressMessage += title + ": added\n";
@@ -1128,6 +1133,7 @@ courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
 cycleThroughUnits(celesteDataCapture(courseID)); // edit unitOperations() to add/remove an operation
 unenrollInCourseID(bb9_courseID);
+//gradebook();
 
 macroCode = "TAB T=1\nFRAME F=2\n";
 macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
