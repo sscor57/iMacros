@@ -9,7 +9,7 @@ var userName = "cswope";
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-  newString = anyStringWithSpaces.replace(/ /g,"<SP>");
+	newString = anyStringWithSpaces.replace(/ /g,"<SP>");
 	return newString
 }
 
@@ -315,6 +315,7 @@ var unitOperations = function(unitNum, contentInfo, unitTitle) {
             num++;
             num--;
 
+
         }
         return num
     }
@@ -399,9 +400,17 @@ var addAssignment = function(unitNum, assignmentInfo) {
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";       
         macroCode += "TAG POS=2 TYPE=SPAN ATTR=CLASS:chevron&&TXT:\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assignment\n";
-        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageAssignmentForm ATTR=ID:content_name CONTENT=" + addIIMSpaces(title) + "\n";
-        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:manageAssignmentForm ATTR=ID:content_desc_text CONTENT=" + addIIMSpaces(artifact) + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageAssignmentForm ATTR=ID:content_name CONTENT=" + addIIMSpaces(title) + "\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+		macroCode += "TAB T=2\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+        e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong submitting " + activityCode + ".";
+        }
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";  
         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageAssignmentForm ATTR=ID:possible CONTENT=100\n";
         macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:manageAssignmentForm ATTR=ID:isTracked CONTENT=YES\n";
         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manageAssignmentForm ATTR=ID:attemptTypeNum\n";
@@ -452,8 +461,16 @@ var addDiscussion = function(unitNum, discussionInfo) {
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:title CONTENT=" + addIIMSpaces(title) + "\n";
-        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:forumForm ATTR=ID:descriptiontext CONTENT=" + addIIMSpaces(artifact) + "\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+		macroCode += "TAB T=2\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+        e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong submitting " + activityCode + ".";
+        }
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";  
         macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorRemove CONTENT=YES\n";
         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:isRemoveAllmsgs_false\n";
         macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorModify CONTENT=YES\n";
@@ -470,13 +487,18 @@ var addDiscussion = function(unitNum, discussionInfo) {
 
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
-        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
-        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+		macroCode += "TAB T=2\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
         e = iimPlay("CODE:" + macroCode);
         if (e != 1) {
-            throw "Something went wrong adding " + activityCode + " in Unit " + unitNum;
+            throw "Something went wrong submitting " + activityCode + ".";
         }
+
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+        e = iimPlay("CODE:" + macroCode);
         
         progressMessage += title + ": added\n";
 		return
@@ -550,8 +572,16 @@ var addUngradedDiscussion = function(discussionInfo) {
 
 		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:title CONTENT=" + linkTitle + "\n";
-		macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:forumForm ATTR=ID:descriptiontext CONTENT=" + artifact + "\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+		macroCode += "TAB T=2\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+        e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong submitting " + activityCode + ".";
+        }
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorRemove CONTENT=YES\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorModify CONTENT=YES\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:allow2\n";
@@ -565,8 +595,16 @@ var addUngradedDiscussion = function(discussionInfo) {
 
 		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
-		macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + artifact + "\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+		macroCode += "TAB T=2\n";
+		macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+        e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            throw "Something went wrong submitting " + activityCode + ".";
+        }
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
 		e = iimPlay("CODE:" + macroCode);
         if (e != 1) {
@@ -580,7 +618,6 @@ var addUngradedDiscussion = function(discussionInfo) {
         fileName = discussionInfo[2];
         linkTitle = addIIMSpaces(discussionInfo[3]);
         artifact = addIIMSpaces("<div class=\"capellaDrawer\">" + discussionInfo[4] + "</div>");
-
 		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Tools\n";
 		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Discussion<SP>Board\n";
@@ -612,9 +649,17 @@ var addUngradedDiscussion = function(discussionInfo) {
                             throw "Something went wrong selecting the right option for " + removeIIMSpaces(linkTitle) + ".";
                         }
 					
-						macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";        
-						macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-						macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:course_link ATTR=ID:link_desc_text CONTENT=" + artifact + "\n";
+						macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                        macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+                        macroCode += "TAB T=2\n";
+                        macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+                        e = iimPlay("CODE:" + macroCode);
+                        if (e != 1) {
+                            throw "Something went wrong submitting " + activityCode + ".";
+                        }
+        
+                        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
 						macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
 						e = iimPlay("CODE:" + macroCode);    
                         if (e != 1) {
@@ -689,8 +734,16 @@ var projectOperations = function(projectNum, contentInfo, projectTitle, componen
                     macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Build<SP>Content\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Item\n";
                     macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:the_form ATTR=ID:user_title CONTENT=" + addIIMSpaces(title) + "\n";
-                    macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/textboxeditor/ed_html.gif\n";
-                    macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:the_form ATTR=ID:htmlData_text CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+					macroCode += "TAB T=2\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+					e = iimPlay("CODE:" + macroCode);
+					if (e != 1) {
+						throw "Something went wrong submitting " + activityCode + ".";
+					}
+					
+					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
                     e = iimPlay("CODE:" + macroCode);
                 }
@@ -1278,6 +1331,9 @@ var gradebook = function() {
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:gradebookDisplayName CONTENT=Disc.<SP>Participation\n";
             macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:prms_left_select EXTRACT=HTM\n";
             e = iimPlay("CODE:" + macroCode);
+            if (e != 1) {
+            	throw "problems while extracting prms_left_select."; 
+            }
             extract = iimGetLastExtract();
             colIDs = extract.match(/<option[\s\S]+?<\/option>/g);
             
@@ -1302,6 +1358,9 @@ var gradebook = function() {
                             macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/ng/cm_arrow_right.gif\n";
                             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:itemWeight" + colWeightID + " CONTENT=" + commonDiscWeight + "\n";
                             e = iimPlay("CODE:" + macroCode);
+							if (e != 1) {
+								throw "problems adding discussions to disc. participation column (with special graded discussion(s))."; 
+							}
                             colWeightID++;
                         }
                     }
@@ -1324,6 +1383,9 @@ var gradebook = function() {
                         macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/images/ci/ng/cm_arrow_right.gif\n";
                         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:itemWeight" + colWeightID + " CONTENT=" + commonDiscWeight + "\n";
                         e = iimPlay("CODE:" + macroCode);
+						if (e != 1) {
+							throw "problems adding discussions to disc. participation column."; 
+						}
                         colWeightID++;
                     }
                 }
@@ -1332,6 +1394,9 @@ var gradebook = function() {
             macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manage_cumulative_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
             e = iimPlay("CODE:" + macroCode);
+			if (e != 1) {
+				throw "problems submitting disc. participation column."; 
+			}
             
         } catch(err) {
             alert(err + " discussionParticipationCol is having problems.");
@@ -1368,6 +1433,7 @@ var gradebook = function() {
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:columnName CONTENT=Current<SP>Grade\n";
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:gradebookDisplayName CONTENT=Current<SP>Grade\n";
             macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:prms_left_select EXTRACT=HTM\n";
+
             e = iimPlay("CODE:" + macroCode);
             extract = iimGetLastExtract();
             colIDs = extract.match(/<option[\s\S]+?<\/option>/g);
