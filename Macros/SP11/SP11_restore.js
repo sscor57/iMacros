@@ -1,3 +1,7 @@
+/*
+Instructions: log into any SP9 instance of BB9, navigate to a course or template, launch the macro.
+*/
+
 var progressMessage = "";
 var errorMessage = "";
 var bb9_courseID = null;
