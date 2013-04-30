@@ -1,3 +1,7 @@
+/*
+Instructions: log into any SP9 instance of BB9, navigate to a course or template, launch the macro.
+*/
+
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
 	var newString = "";
