@@ -4,7 +4,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
-  var newString = "";
+    var newString = "";
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
@@ -172,8 +172,8 @@ var fixManifestoInstitionItems = function() {
             lnavLIs = extract.match(/<li[\s\S]+?<\/li>/g);
     
             for (i = 0; i < lnavLIs.length; i++) {
-                if (lnavLIs[i].search(/Getting Started|Syllabus|Unit \d{1,2}/g) != -1) {
-                    buttonTitle = lnavLIs[i].match(/(Getting Started)|(Syllabus)|(Unit \d{1,2})/g)[1];
+                if (lnavLIs[i].search(/Getting Started|Syllabus|(Course Project(?: \d){0,1})|Unit \d{1,2}/g) != -1) {
+                    buttonTitle = lnavLIs[i].match(/(Getting Started)|(Syllabus)|((Course Project(?: \d){0,1}))|(Unit \d{1,2})/g)[1];
                     buttonTitles.push(buttonTitle);
                 }
             }
@@ -591,10 +591,10 @@ var fixManifestoInstitionItems = function() {
         
         try {
             contentLIs = captureContentAreas();
-            artifact = getArtifact(/first_course_support_getting_started\.html/i, artifactLinks);
+            artifact = getArtifact(/first_course_support_getting_started\.html/, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/<!--GettingStarted-->/) != -1) {
+                if (contentLIs[j].search(/first_course_support_getting_started\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -632,10 +632,10 @@ var fixManifestoInstitionItems = function() {
         
         try {
             contentLIs = captureContentAreas();
-            artifact = getArtifact(/first_course_support\.html/i, artifactLinks);
+            artifact = getArtifact(/first_course_support\.html/, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/<!--FirstCourseSupport-->/) != -1) {
+                if (contentLIs[j].search(/first_course_support\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -673,10 +673,10 @@ var fixManifestoInstitionItems = function() {
         
         try {
             contentLIs = captureContentAreas();
-            artifact = getArtifact(/first_course_support_final_unit\.html/i, artifactLinks);
+            artifact = getArtifact(/first_course_support_final_unit\.html/, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/<!--FinalUnit-->/) != -1) {
+                if (contentLIs[j].search(/first_course_support_final_unit\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -708,7 +708,7 @@ var fixManifestoInstitionItems = function() {
     	editModeON();
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        
+        alert(contentAreas);
         for (i = 0; i < contentAreas.length; i++) {
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
