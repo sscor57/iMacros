@@ -28,7 +28,7 @@ var fixManifestoInstitionItems = function() {
 		var xID = "";
 		var artifact = "";
 		var title = "";
-	    
+		
 	    try {
             macroCode = "SET !VAR1 {{!URLCURRENT}}\n";
             macroCode += "TAB OPEN\n";
@@ -98,9 +98,32 @@ var fixManifestoInstitionItems = function() {
             artifactRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
             
             for (j = 0; j < artifactRows.length; j++) {
-                if (artifactRows[j].search(/oob_print_manifesto\.html/i) != -1) {
+                if (artifactRows[j].search(/OOB_PrintSP11\.html/i) != -1) {
                     xID = artifactRows[j].match(/id=\"(\d+)_1_xythosFileSize\"/)[1];
-                    title = artifactRows[j].match(/oob_print_manifesto\.html/i);
+                    title = artifactRows[j].match(/OOB_PrintSP11\.html/i);
+                }
+                artifact = "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@/bbcswebdav/xid-" + xID + "_1\" target=\"_blank\" alt=\"\">" + title + "</a>";
+                artifactLinks.push(artifact);
+            }
+            
+            macroCode = "FRAME NAME=\"WFS_Navigation\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Institution<SP>Content\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:institution\n";
+            macroCode += "FRAME NAME=\"WFS_Files\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:*_AccordionToolbar\n";
+            e = iimPlay("CODE:" + macroCode);
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"WFS_Files\"\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            artifactRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            
+            for (j = 0; j < artifactRows.length; j++) {
+                if (artifactRows[j].search(/AccordionToolbar\.html/i) != -1) {
+                    xID = artifactRows[j].match(/id=\"(\d+)_1_xythosFileSize\"/)[1];
+                    title = artifactRows[j].match(/AccordionToolbar\.html/i);
                 }
                 artifact = "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@/bbcswebdav/xid-" + xID + "_1\" target=\"_blank\" alt=\"\">" + title + "</a>";
                 artifactLinks.push(artifact);
@@ -137,6 +160,10 @@ var fixManifestoInstitionItems = function() {
                     buttonTitles.push(buttonTitle);
                 }
             }
+            
+            buttonTitles.push("Research Resources");
+            buttonTitles.push("Supplemental Resources");
+            
             return buttonTitles
 		} catch(err) {
 		    alert(err + "\nSomething went wrong with extractLNav");
@@ -178,7 +205,7 @@ var fixManifestoInstitionItems = function() {
         }
     }
     
-    var fixPrint = function(contentLIs) {
+    var fixPrint = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
         var extract = "";
@@ -188,7 +215,7 @@ var fixManifestoInstitionItems = function() {
         
         try {
             contentLIs = captureContentAreas();
-            artifact = getArtifact(/oob_print_manifesto\.html/i, artifactLinks);
+            artifact = getArtifact(/OOB_PrintSP11\.html/i, artifactLinks);
             contextualMenuIdNumber = contentLIs[0].match(/cmlink_(\w{32})/)[1];
         
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -209,6 +236,47 @@ var fixManifestoInstitionItems = function() {
             return
 		} catch(err) {
 		    alert(err + "\nSomething went wrong with captureContentAreas");
+		}
+    }
+    
+    var fixAccordion = function() {
+        var macroCode = "";
+        var e = 0;
+        var extract = "";
+        var contentLIs = [];
+        var contextualMenuIdNumber = "";
+        var artifact = "";
+        
+        try {
+            contentLIs = captureContentAreas();
+            artifact = "<p></p><script type=\"text/javascript\" src=\"//media.capella.edu/Blackboard9/js/CR3/bb9SP11_Layout_accordion_v01.js\"></script>";
+            
+            for (j = 0; j < contentLIs.length; j++) {
+                if (contentLIs[j].search(/Accordi[ao]n/) != -1) {
+                    contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
+					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+					macroCode += "TAB T=2\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+					e = iimPlay("CODE:" + macroCode);
+					if (e != 1) {
+						throw "Something went wrong using the VTE.";
+					}
+		
+					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";  
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw e;
+                    }
+                }
+            }
+            return
+        } catch(err) {
+		    alert(err + "\nSomething went wrong with fixAccordion");
 		}
     }
     
@@ -273,7 +341,7 @@ var fixManifestoInstitionItems = function() {
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
 					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
 					macroCode += "TAB T=2\n";
-					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
@@ -314,7 +382,7 @@ var fixManifestoInstitionItems = function() {
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
 					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
 					macroCode += "TAB T=2\n";
-					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
@@ -355,7 +423,7 @@ var fixManifestoInstitionItems = function() {
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
 					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
 					macroCode += "TAB T=2\n";
-					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
@@ -396,7 +464,7 @@ var fixManifestoInstitionItems = function() {
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
 					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
 					macroCode += "TAB T=2\n";
-					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
@@ -437,7 +505,7 @@ var fixManifestoInstitionItems = function() {
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
 					macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
 					macroCode += "TAB T=2\n";
-					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+					macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
@@ -467,7 +535,8 @@ var fixManifestoInstitionItems = function() {
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
             e = iimPlay("CODE:" + macroCode);
             
-            fixPrint();
+            fixPrint(artifactLinks);
+            fixAccordion(artifactLinks);
             fixCoursePlan(artifactLinks);
             fixLearnerExpectations(artifactLinks);
             fixOrientation(artifactLinks);
