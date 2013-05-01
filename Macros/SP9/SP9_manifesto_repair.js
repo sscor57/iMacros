@@ -136,6 +136,10 @@ var fixManifestoInstitionItems = function() {
                     buttonTitles.push(buttonTitle);
                 }
             }
+            
+            buttonTitles.push("Research Resources");
+            buttonTitles.push("Supplemental Resources");
+            
             return buttonTitles
 		} catch(err) {
 		    alert(err + "\nSomething went wrong with extractLNav");
