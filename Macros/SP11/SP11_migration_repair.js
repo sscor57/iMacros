@@ -92,6 +92,12 @@ var fixManifestoInstitionItems = function() {
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Content<SP>Collection\n";
             e = iimPlay("CODE:" + macroCode);
             
+            macroCode = "TAB T=1\nFRAME NAME=\"WFS_Files\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:filesForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+            e = iimPlay("CODE:" + macroCode);
+            
             macroCode = "FRAME NAME=\"WFS_Navigation\"\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Institution<SP>Content\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:institution\n";
@@ -708,7 +714,7 @@ var fixManifestoInstitionItems = function() {
     	editModeON();
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        alert(contentAreas);
+        
         for (i = 0; i < contentAreas.length; i++) {
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
