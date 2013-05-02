@@ -1,5 +1,5 @@
 /*
-Instructions: log into any SP9 instance of BB9, navigate to a course or template, launch the macro.
+Instructions: log into any SP11 instance of BB9, navigate to a course or template, launch the macro.
 */
 
 var progressMessage = "";
