@@ -155,7 +155,7 @@ var xIDs = function() {
 				contentType = 4;
 				fileName = rowsToScan[i].match(/u\d{2}s\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -164,7 +164,7 @@ var xIDs = function() {
 				contentType = 5;
 				fileName = rowsToScan[i].match(/u\d{2}a\d{1,2}\.html/)[0];
 				linkTitle = "View Assignment Instructions";
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -173,7 +173,7 @@ var xIDs = function() {
 				contentType = 6;
 				fileName = rowsToScan[i].match(/u\d{2}d\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -212,10 +212,10 @@ var cycleThroughUnits = function(celesteData) {
 		progressMessage += "Getting Started Operations:\n";
 		lnavButtonClick("Getting Started");
 		
-		discussionInfo = [6, 1210, "welcome_and_introductions.html", "Welcome and Introductions", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1210_1\" target=\"_blank\" alt=\"\">welcome_and_introductions.html</a>"];
+		discussionInfo = [6, 1210, "welcome_and_introductions.html", "Welcome and Introductions", "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-1210_1\" target=\"_blank\" alt=\"\">welcome_and_introductions.html</a>"];
 		addUngradedDiscussion(discussionInfo);
 		
-		discussionInfo = [6, 1227, "faculty_expectations.html", "Faculty Expectations", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1227_1\" target=\"_blank\" alt=\"\">faculty_expectations.html</a>"];
+		discussionInfo = [6, 1227, "faculty_expectations.html", "Faculty Expectations", "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-1227_1\" target=\"_blank\" alt=\"\">faculty_expectations.html</a>"];
 		addUngradedDiscussion(discussionInfo);
 		// end Getting Started
 		
@@ -367,10 +367,10 @@ var unitOperations = function(unitNum, contentInfo, unitTitle) {
             addQuiz(unitNum, quizzes[j]);
         }
 		
-		discussionInfo = [6, 1211, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1211_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
+		discussionInfo = [6, 1211, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-1211_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
 		addUngradedDiscussion(discussionInfo);
 		
-		discussionInfo = [6, 1212, "ask_your_instructor.html", "Ask Your Instructor", "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-1212_1\" target=\"_blank\" alt=\"\">ask_your_instructor.html</a>"];
+		discussionInfo = [6, 1212, "ask_your_instructor.html", "Ask Your Instructor", "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-1212_1\" target=\"_blank\" alt=\"\">ask_your_instructor.html</a>"];
 		addUngradedDiscussion(discussionInfo);
 		return
     } catch(err) {
@@ -1011,7 +1011,7 @@ var xIDs = function() {
 				contentType = 4;
 				fileName = rowsToScan[i].match(/u\d{2}s\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -1020,7 +1020,7 @@ var xIDs = function() {
 				contentType = 5;
 				fileName = rowsToScan[i].match(/u\d{2}a\d{1,2}\.html/)[0];
 				linkTitle = "View Assignment Instructions";
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -1029,7 +1029,7 @@ var xIDs = function() {
 				contentType = 6;
 				fileName = rowsToScan[i].match(/u\d{2}d\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
@@ -1038,7 +1038,7 @@ var xIDs = function() {
 				contentType = 7;
 				fileName = rowsToScan[i].match(/u\d{2}q\d{1,2}\.html/)[0];
 				linkTitle = fileName;
-				artifact = "<a target=\"_blank\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@.capella.edu/bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+				artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
 				artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
 				contentInfo.push(artifactInfo);
 		    }
