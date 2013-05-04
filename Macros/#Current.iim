@@ -1,5 +1,3 @@
-﻿FRAME NAME="WFS_Navigation"
-TAG POS=1 TYPE=A ATTR=TXT:Institution<SP>Content
-TAG POS=1 TYPE=A ATTR=TXT:institution
-FRAME NAME="WFS_Files"
-TAG POS=1 TYPE=A ATTR=TXT:*_Discussions
+﻿TAB T=1
+FRAME NAME="content"
+TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:the_form ATTR=NAME:bottom_Submit&&VALUE:Submit

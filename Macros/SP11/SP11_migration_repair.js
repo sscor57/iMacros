@@ -313,7 +313,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/policies_procedures\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Review Policies and Procedures</) != -1) {
+                if (contentLIs[j].search(/policies_procedures\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -354,7 +354,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/review_syllabus_and_project\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Review the Syllabus</) != -1) {
+                if (contentLIs[j].search(/review_syllabus_and_project\.html|review_syllabus\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -395,7 +395,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/welcome_and_introductions\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Welcome and Introductions</) != -1) {
+                if (contentLIs[j].search(/welcome_and_introductions\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -436,7 +436,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/faculty_expectations\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Faculty Expectations</) != -1) {
+                if (contentLIs[j].search(/faculty_expectations\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -477,7 +477,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/updates_handouts\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Updates and Handouts</) != -1) {
+                if (contentLIs[j].search(/updates_handouts\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -518,7 +518,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/ask_your_instructor\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Ask Your Instructor</) != -1) {
+                if (contentLIs[j].search(/ask_your_instructor\.html/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
