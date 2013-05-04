@@ -247,7 +247,7 @@ var fixManifestoInstitionItems = function() {
 			macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 			e = iimPlay("CODE:" + macroCode);
 			if (e != 1) {
-				throw "Something went wrong using the VTE.";
+				throw "Something went wrong using the VTBE.";
 			}
 	
 			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";  
@@ -283,7 +283,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";  
@@ -324,7 +324,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -365,7 +365,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -406,7 +406,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -447,7 +447,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -488,7 +488,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -529,7 +529,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -570,7 +570,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -611,7 +611,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -652,7 +652,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -693,7 +693,7 @@ var fixManifestoInstitionItems = function() {
 					macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 					e = iimPlay("CODE:" + macroCode);
 					if (e != 1) {
-						throw "Something went wrong using the VTE.";
+						throw "Something went wrong using the VTBE.";
 					}
 		
 					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
