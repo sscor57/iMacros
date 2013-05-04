@@ -912,41 +912,35 @@ var celesteDataCapture = function(courseID) {
         subMenu = extract.match(/<a href="#" onclick="">\s*Syllabus<\/a>\s*?(<ul>[\s\S]+?<\/ul>)/)[1];
         projectTitles = subMenu.match(/Project: [\s\S]+?(?=<\/a>)/g);
         
-        if (projectTitles === null) {
-            macroCode = "TAG POS=1 TYPE=A ATTR=TXT:Logout\n";
-            macroCode += "WAIT SECONDS=2\n";
-            macroCode += "TAB CLOSE\n";
-            e = iimPlay("CODE:" + macroCode);
-            if (e != 1) {
-                throw e;
+        if (projectTitles != null) {
+            for (i = 0; i < projectTitles.length; i++) {
+                projectTitles[i] = projectTitles[i].replace(/Project: /, "");
             }
-            return celesteData
+        
+            celesteData.push(projectTitles);
+        
+            for (i = 0; i < projectTitles.length; i++) {
+                components = [];
+                macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
+                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
+                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
+                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
+                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+                components = extract.match(/u\d{2}[ad]\d{1,2}/g);
+                projectComponents.push(components);
+            }
+        
+            celesteData.push(projectComponents);
+        } else {
+            celesteData.push(projectTitles);
+            celesteData.push(projectComponents);
         }
-        
-        for (i = 0; i < projectTitles.length; i++) {
-            projectTitles[i] = projectTitles[i].replace(/Project: /, "");
-        }
-        
-        celesteData.push(projectTitles);
-        
-        for (i = 0; i < projectTitles.length; i++) {
-            components = [];
-            macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-            macroCode += "WAIT SECONDS=1\n";
-            macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
-            macroCode += "WAIT SECONDS=1\n";
-            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
-            macroCode += "WAIT SECONDS=1\n";
-            macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
-            macroCode += "WAIT SECONDS=1\n";
-            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-            components = extract.match(/u\d{2}[ad]\d{1,2}/g);
-            projectComponents.push(components);
-        }
-        
-        celesteData.push(projectComponents);
         
         macroCode = "TAG POS=1 TYPE=A ATTR=TXT:Logout\n";
         macroCode += "WAIT SECONDS=2\n";
