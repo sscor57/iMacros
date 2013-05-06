@@ -13,7 +13,7 @@ var userName = "cswope";
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-	newString = anyStringWithSpaces.replace(/ /g,"<SP>");
+    newString = anyStringWithSpaces.replace(/ /g,"<SP>");
 	return newString
 }
 
@@ -197,6 +197,7 @@ var xIDs = function() {
 */
 var cycleThroughUnits = function(celesteData) {
     var i = 0;
+    var j = 0;
     var xidList = [];
     var lnavUnitName = "";
     var macroCode = "";
@@ -206,6 +207,9 @@ var cycleThroughUnits = function(celesteData) {
 	var unitTitles = celesteData[0];
 	var projectTitles = celesteData[1];
 	var projectComponents = celesteData[2];
+	var turnitinData = celesteData[3];
+	var tiiTitle = "";
+	var tiiType = "";
 
 	try {
 	    // begin Getting Started		
@@ -220,10 +224,7 @@ var cycleThroughUnits = function(celesteData) {
 		// end Getting Started
 		
 		// begin Syllabus	
-		progressMessage += "Syllabus Operations:\n";
-		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
-		e = iimPlay("CODE:" + macroCode);
+		lnavButtonClick("Syllabus");
 		// end Syllabus
 		
 		// begin Course Project(s)
@@ -251,6 +252,68 @@ var cycleThroughUnits = function(celesteData) {
 		}
 		// end Units
 		
+		// begin Turnitin
+		lnavButtonClick("Turnitin");
+		progressMessage += "Turnitin Operations:\n";
+		
+		for (i = 0; i < turnitinData.length; i++) {
+			tiiTitle = turnitinData[i][0];
+			tiiType = turnitinData[i][1];
+			
+			if (tiiType === "final") {
+				tiiType = 0;
+			} else {
+				tiiType = 1;
+			}
+			
+			macroCode = "SET !TIMEOUT_STEP 1\n";
+			macroCode += "TAB T=1\nFRAME F={{loop}}\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
+			j = 5;
+			while (true) {
+			   iimSet("loop", j)
+			   if (iimPlay("CODE:" + macroCode) == 1)
+			   {
+				  break;
+			   }
+			   j++;
+			}
+			
+			macroCode = "SET !TIMEOUT_STEP 1\n";
+			macroCode += "TAB T=1\nFRAME F={{loop}}\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
+			macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:display_due_date\n";
+			macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
+			macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
+			macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:31\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Optional<SP>settings\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:generate_reports_1\n";
+			macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:report_gen_speed CONTENT=%" + tiiType + "\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_biblio_exclusion_0\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_quoted_exclusion_0\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_small_matches_1\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:exclude_by_words_radio\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
+			macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
+			j = 0;
+			while (true) {
+			   iimSet("loop", j)
+			   if (iimPlay("CODE:" + macroCode) == 1)
+			   {
+				  break;
+			   }
+			   j++;
+			}
+		}
+		// end Turnitin
 		progressMessage += "Content areas are set up.\n";
 		return
     } catch(err) {
@@ -318,8 +381,6 @@ var unitOperations = function(unitNum, contentInfo, unitTitle) {
         if (num < 10) {
             num++;
             num--;
-
-
         }
         return num
     }
@@ -793,6 +854,7 @@ var templateInfo = function() {
 		bb9_courseID = courseName;
 	
 		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode = "SET !TIMEOUT_STEP 1\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Teaching<SP>Style\n";
 		e = iimPlay("CODE:" + macroCode);
 		
@@ -947,6 +1009,9 @@ var celesteDataCapture = function(courseID) {
             celesteData.push(projectComponents);
         }
         
+        assignments.push(["1 - Draft", "draft"])
+        assignments.push(["2 - Draft", "draft"])
+        
         macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
         macroCode += "WAIT SECONDS=2\n";
         macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Activities\n";
@@ -955,26 +1020,23 @@ var celesteDataCapture = function(courseID) {
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
         
+        assignmentRows = extract.match(/<li[\s\S]+?<\/li>/g);
+        
         for (i = 0; i < assignmentRows.length; i++) {
-            assignmentCode = assignmentRows[i].match(/u\d{2}a\d{1,2}/g);
-            alert(assignmentCode);
-            /*
-            unitNum = assignmentCode.match(/u(\d{2})a\d{1,2}/g)[1];
-            assNum = assignmentCode.match(/u\d{2}a(\d{1,2})/g)[1];
+            assignmentCode = assignmentRows[i].match(/u\d{2}a\d{1,2}/)[0];
+            unitNum = assignmentCode.match(/u(\d{2})a\d{1,2}/)[1];
+            assNum = assignmentCode.match(/u\d{2}a(\d{1,2})/)[1];
             unitNum++;
             unitNum--;
-            assignmentTitle = "[" + assignmentCode + "] Unit " + unitNum + " Assignment " + assNum;
-            
             if (assignmentRows[i].search(/draft/i) > -1) {
-                assType = "draft";
+            	assType = "draft";
             } else {
-                assType = "final";
+            	assType = "final";
             }
-            
-            assignment = [assignmentTitle, assType];
+            assignment = ["[" + assignmentCode + "] Unit " + unitNum + " Assignment " + assNum, assType];
             assignments.push(assignment);
-            */
         }
+        
         celesteData.push(assignments);
         
         macroCode = "TAG POS=1 TYPE=A ATTR=TXT:Logout\n";
