@@ -9,18 +9,19 @@ var numberOfUnits = 0;
 var numberOfProjects = 0;
 var courseID = null;
 var userName = "cswope";
+var celesteData = [];
 
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-    newString = anyStringWithSpaces.replace(/ /g,"<SP>");
+	newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 	return newString
 }
 
 // replaces iMacros space entity ('<SP>') in a string with a space character (' ').
 var removeIIMSpaces = function(anyStringWithIIMSpaces) {
     var newString = "";
-	newString = anyStringWithIIMSpaces.replace(/<SP>/g," ");
+	newString = anyStringWithIIMSpaces.replace(/<SP>/g, " ");
 	return newString
 }
 
@@ -210,9 +211,10 @@ var cycleThroughUnits = function(celesteData) {
 	var turnitinData = celesteData[3];
 	var tiiTitle = "";
 	var tiiType = "";
+	var currentFrame = 0;
 
 	try {
-	    // begin Getting Started		
+		// begin Getting Started		
 		progressMessage += "Getting Started Operations:\n";
 		lnavButtonClick("Getting Started");
 		
@@ -224,7 +226,10 @@ var cycleThroughUnits = function(celesteData) {
 		// end Getting Started
 		
 		// begin Syllabus	
-		lnavButtonClick("Syllabus");
+		progressMessage += "Syllabus Operations:\n";
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
+		e = iimPlay("CODE:" + macroCode);
 		// end Syllabus
 		
 		// begin Course Project(s)
@@ -256,6 +261,8 @@ var cycleThroughUnits = function(celesteData) {
 		lnavButtonClick("Turnitin");
 		progressMessage += "Turnitin Operations:\n";
 		
+		addTIIFrame = 2;
+		nextFrame = 5;
 		for (i = 0; i < turnitinData.length; i++) {
 			tiiTitle = turnitinData[i][0];
 			tiiType = turnitinData[i][1];
@@ -267,21 +274,46 @@ var cycleThroughUnits = function(celesteData) {
 			}
 			
 			macroCode = "SET !TIMEOUT_STEP 1\n";
-			macroCode += "TAB T=1\nFRAME F={{loop}}\n";
+			macroCode += "TAB T=1\nFRAME F=" + addTIIFrame + "\n";
 			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
 			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
-			j = 5;
-			while (true) {
-			   iimSet("loop", j)
-			   if (iimPlay("CODE:" + macroCode) == 1)
-			   {
-				  break;
-			   }
-			   j++;
+			e = iimPlay("CODE:" + macroCode);
+			if (e != 1) {
+                macroCode = "SET !TIMEOUT_STEP 1\n";
+                macroCode += "TAB T=1\nFRAME F={{loop}}\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
+                j = 0;
+                while (true) {
+                    iimSet("loop", j);
+                    if (iimPlay("CODE:" + macroCode) == 1) {
+                        break;
+                    }
+                    j++;
+                }
+			}
+			
+			macroCode = "TAB T=1\nFRAME F=" + nextFrame + "\n";
+			macroCode += "TAG POS=1 TYPE=BODY ATTR=TXT:* EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+				
+			if (extract.search(/<h2>user agreement<\/h2>/) > -1) {
+				macroCode = "TAB T=1\nFRAME F=" + nextFrame + "\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:new_user5 ATTR=NAME:submit&&VALUE:I<SP>agree<SP>--<SP>continue\n";
+				macroCode += "TAG POS=1 TYPE=BODY ATTR=TXT:* EXTRACT=HTM\n";
+				e = iimPlay("CODE:" + macroCode);
+			} 
+			
+			if (extract.search(/<h2>Select your assignment type<\/h2>/) > -1) {
+				macroCode = "TAB T=1\nFRAME F=" + nextFrame + "\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:pa\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit&&VALUE:Next<SP>Step\n";
+				e = iimPlay("CODE:" + macroCode);
 			}
 			
 			macroCode = "SET !TIMEOUT_STEP 1\n";
-			macroCode += "TAB T=1\nFRAME F={{loop}}\n";
+			macroCode += "TAB T=1\nFRAME F=" + nextFrame + "\n";
 			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
 			macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:display_due_date\n";
 			macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
@@ -303,17 +335,64 @@ var cycleThroughUnits = function(celesteData) {
 			macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
 			macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
 			macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
-			j = 0;
-			while (true) {
-			   iimSet("loop", j)
-			   if (iimPlay("CODE:" + macroCode) == 1)
-			   {
-				  break;
-			   }
-			   j++;
-			}
-		}
-		// end Turnitin
+			e = iimPlay("CODE:" + macroCode);
+			if (e == 1) {
+                nextFrame += 2;
+            }
+			if (e != 1) {
+                macroCode = "SET !TIMEOUT_STEP 1\n";
+                macroCode += "TAB T=1\nFRAME F={{loop}}\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
+                macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:display_due_date\n";
+                macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
+                macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
+                macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:31\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Optional<SP>settings\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:generate_reports_1\n";
+                macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:report_gen_speed CONTENT=%" + tiiType + "\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_biblio_exclusion_0\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_quoted_exclusion_0\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_small_matches_1\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:exclude_by_words_radio\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
+                macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
+                j = 0;
+                while (true) {
+                    iimSet("loop", j);
+                    if (iimPlay("CODE:" + macroCode) == 1) {
+                        alert(j);
+                        nextFrame = j + 2;
+                        break;
+                    }
+                    j++;
+                }
+            }
+            addTIIFrame += 2;
+        }
+		
+		// the tii building block does crazy things to the frameset. this gets things back to normal.
+		macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
+        macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Courses\n";
+        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:courseManagerFormSearch ATTR=NAME:courseInfoSearchKeyString CONTENT=%CourseId\n";
+        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:courseManagerFormSearch ATTR=NAME:courseInfoSearchOperatorString CONTENT=%Contains\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerFormSearch ATTR=ID:courseInfoSearchText CONTENT=" + bb9_courseID + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:courseManagerFormSearch ATTR=VALUE:Go\n";
+        e = iimPlay("CODE:" + macroCode);
+    
+		macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
+		e = iimPlay("CODE:" + macroCode);
+    	// end Turnitin
+    	
 		progressMessage += "Content areas are set up.\n";
 		return
     } catch(err) {
@@ -1293,13 +1372,14 @@ var unenrollInCourseID = function(templateID) {
 }
 
 // controls all the gradebook setup operations.
-var gradebook = function() {
+var gradebook = function(celesteData) {
     var macroCode = "";
     var e = "";
     var extract = "";
     var gradingTableRows = [];
     var i = 0;
     var gradedDiscussions = [];
+	var turnitinData = celesteData[3];
     
     // smartview operations.
     var smartViews = function() {
@@ -1370,7 +1450,7 @@ var gradebook = function() {
                     }
                     
                     macroCode = "TAB T=1\nFRAME F=2\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:name CONTENT=" + newTitle + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:name CONTENT=" + addIIMSpaces(newTitle) + "\n";
                     macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:AddModifyCustomViewsForm ATTR=ID:favoriteCbox CONTENT=YES\n";
                     macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:custom_view_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
                     e = iimPlay("CODE:" + macroCode);
@@ -1391,7 +1471,7 @@ var gradebook = function() {
             e = iimPlay("CODE:" + macroCode);
 
             editSmartview("Assignments", "Assignments");
-            editSmartview("Discussion Boards", "Discussions");
+            editSmartview("Discussion Boards", "Discussion Participation");
             editSmartview("Tests", "Quizzes");
             
             macroCode = "TAB T=1\nFRAME F=2\n";
@@ -1528,9 +1608,9 @@ var gradebook = function() {
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:columnName CONTENT=Current<SP>Grade\n";
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:gradebookDisplayName CONTENT=Current<SP>Grade\n";
             macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:prms_left_select EXTRACT=HTM\n";
-
             e = iimPlay("CODE:" + macroCode);
             extract = iimGetLastExtract();
+            
             colIDs = extract.match(/<option[\s\S]+?<\/option>/g);
             weight = 0;
             
@@ -1717,7 +1797,7 @@ var gradebook = function() {
         }
     }
     
-    // sets up the Current Grade Column (it includes individually graded topics).
+    // moves the disc. participation, current grade and final grade columns to the beginning of the gradbook.
 	var arrangeColumns = function() {
         var macroCode = "";
         var e = "";
@@ -1763,13 +1843,6 @@ var gradebook = function() {
 			reorderItems = extract.match(/<option[\s\S]+?<\/option>/g);
 			
 			for (i = 0; i < reorderItems.length; i++) {
-				if (reorderItems[i].search(/Final Grade/) != -1) {
-					id = reorderItems[i].match(/item_(\d+)/)[1];
-					clicks(id, orgRowNum);
-				}
-			}
-			
-			for (i = 0; i < reorderItems.length; i++) {
 				if (reorderItems[i].search(/Current Grade/) != -1) {
 					id = reorderItems[i].match(/item_(\d+)/)[1];
 					clicks(id, orgRowNum);
@@ -1783,13 +1856,132 @@ var gradebook = function() {
 				}
 			}
 			
+			for (i = 0; i < reorderItems.length; i++) {
+				if (reorderItems[i].search(/Final Grade/) != -1) {
+					id = reorderItems[i].match(/item_(\d+)/)[1];
+					clicks(id, orgRowNum);
+				}
+			}
+			
 			macroCode = "TAB T=1\nFRAME F=2\n";		
 			macroCode += "TAG POS=1 TYPE=BUTTON ATTR=ID:gpRepoApply\n";
 			macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:gradingPeriodLayoutForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
 			e = iimPlay("CODE:" + macroCode);
-			
+			return
         } catch(err) {
             alert(err + " arrangeColumns is having problems.");
+        }
+    }
+    
+    // hides the turnitin assignment columns 
+    var hideTIIColumns = function(tiiList) {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var thCols = [];
+        var i = 0;
+        var tiiCols = [];
+        var j = 0;
+        
+        var screenReaderON = function() {
+            var macroCode = "";
+            var e = "";
+            var extract = "";
+            
+            try {
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:pageTitleBar EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+        
+                if (extract.search(/Screen Reader Mode Active/) == -1) {
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + extract.match(/cmlink_\w{32}/) + "\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turn<SP>Screen<SP>Reader<SP>Mode<SP>On\n";
+                    macroCode += "WAIT SECONDS=4\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            } catch(err) {
+                alert(err + " screenReaderON is having problems.");
+            }
+		}
+		
+        try {
+            screenReaderON();
+        
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+        
+            thCols = extract.match(/<th[\s\S]+?<\/th>/g);
+            thCols = thCols.slice(Math.max(thCols.length - tiiList.length, 1));
+        
+            for (i = thCols.length - 1; i > thCols.length - (tiiList.length + 1); i--) {	
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + thCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                e = iimPlay("CODE:" + macroCode);
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+            
+                tiiCols = extract.match(/<th[\s\S]+?<\/th>/g);
+                tiiCols = tiiCols.slice(Math.max(tiiCols.length - tiiList.length, 1));
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                e = iimPlay("CODE:" + macroCode);
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[tiiCols.length - 1].match(/cmlink_.+?(?=")/) + "\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Edit<SP>Column<SP>Information\n";
+                e = iimPlay("CODE:" + macroCode);
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:item_definition_form ATTR=ID:scrollableNo\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:item_definition_form ATTR=ID:visibleNo\n";
+                macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:item_definition_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                macroCode += "WAIT SECONDS=1\n";
+                e = iimPlay("CODE:" + macroCode);
+		    }
+		
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+        
+            thCols = extract.match(/<th[\s\S]+?<\/th>/g);
+            thCols = thCols.slice(Math.max(thCols.length - tiiList.length, 1));
+    
+            for (i = thCols.length - 1; i > thCols.length - (tiiList.length + 1); i--) {	
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + thCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                e = iimPlay("CODE:" + macroCode);
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+            
+                tiiCols = extract.match(/<th[\s\S]+?<\/th>/g);
+                tiiCols = tiiCols.slice(Math.max(tiiCols.length - tiiList.length, 1));
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                e = iimPlay("CODE:" + macroCode);
+            
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[tiiCols.length - 1].match(/cmlink_.+?(?=")/) + "\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column\n";
+                macroCode += "WAIT SECONDS=3\n";
+                e = iimPlay("CODE:" + macroCode);
+            }
+		    return
+        } catch(err) {
+            alert(err + " hideTIIColumns is having problems.");
         }
     }
 
@@ -1814,6 +2006,7 @@ var gradebook = function() {
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
         e = iimPlay("CODE:" + macroCode);
         
+        hideTIIColumns(turnitinData);
         smartViews();
 		discussionParticipationCol(gradedDiscussions);
 		currentGradeCol(gradingTableRows, gradedDiscussions);
@@ -1829,6 +2022,7 @@ var gradebook = function() {
 
 courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
-cycleThroughUnits(celesteDataCapture(courseID)); // edit unitOperations() to add/remove an operation
-gradebook();
+celesteData = celesteDataCapture(courseID);
+cycleThroughUnits(celesteData); // edit unitOperations() to add/remove an operation
+gradebook(celesteData);
 unenrollInCourseID(bb9_courseID);
