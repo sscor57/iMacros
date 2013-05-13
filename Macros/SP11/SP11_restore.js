@@ -196,7 +196,7 @@ var xIDs = function() {
     areas, with the exception of Course Project and Unit areas, which have their own functions 
     for that. this is where they're called.
 */
-var cycleThroughUnits = function(celesteData) {
+var cycleThroughLNav = function(celesteData) {
     var i = 0;
     var j = 0;
     var xidList = [];
@@ -396,7 +396,7 @@ var cycleThroughUnits = function(celesteData) {
 		progressMessage += "Content areas are set up.\n";
 		return
     } catch(err) {
-        alert(err + " cycleThroughUnits is having problems.");
+        alert(err + " cycleThroughLNav is having problems.");
     }
 }
 
@@ -2023,6 +2023,6 @@ var gradebook = function(celesteData) {
 courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
 celesteData = celesteDataCapture(courseID);
-cycleThroughUnits(celesteData); // edit unitOperations() to add/remove an operation
+cycleThroughLNav(celesteData); // edit unitOperations() to add/remove an operation
 gradebook(celesteData);
 unenrollInCourseID(bb9_courseID);
