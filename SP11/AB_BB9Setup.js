@@ -18,12 +18,10 @@ var controlFlow = function(){
 		e = iimPlay("CODE:" + macroCode);
 		extract = iimGetLastExtract();
 		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
-		alert(rowsToScan)
 
-		for (i=0;i<rowsToScan.length;i++) {
-
+		for (i=1;i<rowsToScan.length;i++) {
+			len = i;
 			//userEnroll();
-			alert(i)
 			gradebook();
 
 		}
@@ -56,7 +54,7 @@ var userEnroll = function() {
 var gradebook = function(){
 	    
 		// smartview operations.
-    var smartViews = function() {
+        var smartViews = function() {
         var macroCode = "";
         var e = "";
         var extract = "";
@@ -78,48 +76,63 @@ var gradebook = function(){
             smartViewRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
             return smartViewRows
         }
-        
+
         var editSmartview = function(title, newTitle) {
             var macroCode = "";
             var e = "";
-			var f = "";
             var smartViewRows = [];
             var currentTitle = "";
             var contextualMenuIdNumber = "";
-            
+            var assignCode = [];
+		var tdCode = [];
+		
             smartViewRows = extractSmartViewRows();
             currentTitle = ">" + title + "<";
-            for (f = 0; f < smartViewRows.length; f++) {
-                if (smartViewRows[f].search(currentTitle) != - 1) {
-                    contextualMenuIdNumber = smartViewRows[f].match(/cmlink_(\w{32})/)[1];
+            for (i = 0; i < smartViewRows.length; i++) {
+                if (smartViewRows[i].search(currentTitle) != - 1) {
+                    contextualMenuIdNumber = smartViewRows[i].match(/cmlink_(\w{32})/)[1];
 
                     macroCode = "TAB T=1\nFRAME F=2\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
                     macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:context_menu_tag_item1_" + contextualMenuIdNumber + "\n";
-macroCode += "WAIT SECONDS=4\n";
+			macroCode += "WAIT SECONDS=4\n";
                     e = iimPlay("CODE:" + macroCode);
                     
                     if (newTitle === "Assignments") {
                         macroCode = "TAB T=1\nFRAME F=2\n";
-                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%9919\n";
+            		macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dataCollectionContainer EXTRACT=HTM\n";
+           		e = iimPlay("CODE:" + macroCode);
+           		extract = iimGetLastExtract();
+           		alert(extract);
+           		tdCode = extract.match(/<label for\=\"categorySel[\s\S]+?<\/td>/);
+           		alert(tdCode);
+	                assignCode = tdCode[0].match(/[0-9]{4}/g)[0];
+			alert(assignCode);
+			
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
+			macroCode += "WAIT SECONDS=1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%"+assignCode+"\n";
                         macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
                         macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:filterQueryCriteria CONTENT=%ALL\n";
                         e = iimPlay("CODE:" + macroCode);
                     }
-                    
-                    if (newTitle === "Discussions") {
+                      if (newTitle === "Quizzes") {
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+            		macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dataCollectionContainer EXTRACT=HTM\n";
+           		e = iimPlay("CODE:" + macroCode);
+           		extract = iimGetLastExtract();
+           		alert(extract);
+           		tdCode = extract.match(/<label for\=\"categorySel[\s\S]+?<\/td>/);
+           		alert(tdCode);
+	                assignCode = tdCode[0].match(/[0-9]{4}/g)[14];
+			alert(assignCode);
+                        
                         macroCode = "TAB T=1\nFRAME F=2\n";
                         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
-                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%9922\n";
-                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
-                        e = iimPlay("CODE:" + macroCode);
-                    }
-                    
-                    if (newTitle === "Quizzes") {
-                        macroCode = "TAB T=1\nFRAME F=2\n";
-                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
-                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%9921\n";
+			macroCode += "WAIT SECONDS=1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%"+assignCode+"\n";
                         macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
                         e = iimPlay("CODE:" + macroCode);
                     }
@@ -130,11 +143,33 @@ macroCode += "WAIT SECONDS=4\n";
                     macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:custom_view_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
                     e = iimPlay("CODE:" + macroCode);
                 }
-            }
+				
+                    if (newTitle === "Discussions") {
+                        
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+            		macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dataCollectionContainer EXTRACT=HTM\n";
+           		e = iimPlay("CODE:" + macroCode);
+           		extract = iimGetLastExtract();
+           		alert(extract);
+           		tdCode = extract.match(/<label for\=\"categorySel[\s\S]+?<\/td>/);
+           		alert(tdCode);
+	                assignCode = tdCode[0].match(/[0-9]{4}/g)[5];
+			alert(assignCode);
+                        
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
+			macroCode += "WAIT SECONDS=1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%"+assignCode+"\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
+                        e = iimPlay("CODE:" + macroCode);
+                    }
+                    
+	           }
         }
         
         try {
             macroCode = "TAB T=1\nFRAME F=2\n";
+		macroCode += "WAIT SECONDS=4\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Manage\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Smart<SP>Views\n";
             e = iimPlay("CODE:" + macroCode);
@@ -146,9 +181,9 @@ macroCode += "WAIT SECONDS=4\n";
             e = iimPlay("CODE:" + macroCode);
 
             editSmartview("Assignments", "Assignments");
-            editSmartview("Discussion Boards", "Discussions");
-            editSmartview("Tests", "Quizzes");
-            
+            editSmartview("Discussions", "Discussions");
+            editSmartview("Quizzes", "Quizzes");
+                        
             macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
             e = iimPlay("CODE:" + macroCode);
@@ -346,30 +381,52 @@ macroCode += "WAIT SECONDS=4\n";
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
         e = iimPlay("CODE:" + macroCode);
 	}
+	
+	var fixUnit = function(){
+		var contextualGSNum = "";
+		var extract = "";
 
-			macroCode = "TAB T=1\nFRAME F=2\n";
-   	 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
-   			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
-   			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
-			macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
-			e = iimPlay("CODE:" + macroCode);
+       		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Unit<SP>8\n";
+		macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=UL ATTR=ID:content_listContainer EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
 			extract = iimGetLastExtract();
-			rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+
+
+		contextualGSNum = extract.match(/cmlink_(\w{32})/g)[1];
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:"+contextualGSNum+"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:remove_*\n";
+		macroCode += "WAIT SECONDS=1\n";
+			e = iimPlay("CODE:" + macroCode);
+	}
+
+		macroCode = "TAB T=1\nFRAME F=2\n";
+   	 	macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
 		
-			contextualMenuIdNumber = rowsToScan[y].match(/cmlink_(\w{32})/)[1];
-			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
-			macroCode += "TAG POS=1 TYPE=A ATTR=ID:openItem*\n";
-	        macroCode += "TAB T=1\nFRAME F=2\n";
+		contextualMenuIdNumber = rowsToScan[len].match(/cmlink_(\w{32})/)[1];
+		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:openItem*\n";
+		macroCode += "TAB T=2\nFRAME NAME=\"content\"\n";
 	        macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.grade.center_groupExpanderLink\n";
-    	    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
+    	  	macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
         	e = iimPlay("CODE:" + macroCode);
 			
-		smartViews();
+		//smartViews();
+		fixUnit();
 		//removeColumns();
 
 			macroCode = "TAB T=1\n TAB CLOSE\n";
 			e = iimPlay("CODE:" + macroCode);
 }
+
 
 controlFlow();
