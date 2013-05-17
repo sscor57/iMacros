@@ -45,6 +45,23 @@ var editModeON = function() {
     }
 }
 
+// clicks on a left nav buttons title text.
+var lnavButtonClick = function(button) {
+    var macroCode = "";
+    e = 0;
+    var iimButton = "";
+
+	try {
+        iimButton = addIIMSpaces(button);
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + iimButton + "\n";
+        e = iimPlay("CODE:" + macroCode);
+        return
+    } catch(err) {
+        alert(err + " lnavButtonClick is having problems.");
+    }
+}
+
 var fixManifestoInstitionItems = function() {
 	var macroCode = "";
 	var e = 0;
@@ -181,9 +198,7 @@ var fixManifestoInstitionItems = function() {
         
             celesteData.push(assignments);
         
-            macroCode = "TAG POS=1 TYPE=A ATTR=TXT:Logout\n";
-            macroCode += "WAIT SECONDS=2\n";
-            macroCode += "TAB CLOSE\n";
+            macroCode = "TAB CLOSE\n";
             e = iimPlay("CODE:" + macroCode);
             if (e != 1) {
                 throw e;
@@ -192,158 +207,6 @@ var fixManifestoInstitionItems = function() {
             return celesteData
         } catch(err) {
             alert(err + " celesteDataCapture is having problems.");
-        }
-    }
-	
-	var tii = function(celesteData) {
-        var i = 0;
-        var j = 0;
-        var macroCode = "";
-        var e = 0;
-        var turnitinData = celesteData[3];
-        var tiiTitle = "";
-        var tiiType = "";
-        var addTIIFrame = 0;
-        var nextFrame = 0;
-
-        try {
-            // begin Turnitin
-            lnavButtonClick("Turnitin");
-            progressMessage += "Turnitin Operations:\n";
-        
-            addTIIFrame = 2;
-            nextFrame = 5;
-            for (i = 0; i < turnitinData.length; i++) {
-                tiiTitle = turnitinData[i][0];
-                tiiType = turnitinData[i][1];
-            
-                if (tiiType === "final") {
-                    tiiType = 0;
-                } else {
-                    tiiType = 1;
-                }
-            
-                macroCode = "SET !TIMEOUT_STEP 1\n";
-                macroCode += "TAB T=1\nFRAME F=" + addTIIFrame + "\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
-                e = iimPlay("CODE:" + macroCode);
-                if (e != 1) {
-                    macroCode = "SET !TIMEOUT_STEP 1\n";
-                    macroCode += "TAB T=1\nFRAME F={{loop}}\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
-                    j = 0;
-                    while (true) {
-                        iimSet("loop", j);
-                        if (iimPlay("CODE:" + macroCode) == 1) {
-                            break;
-                        }
-                        j++;
-                    }
-                }
-            
-                macroCode = "TAB T=1\nFRAME F=" + nextFrame + "\n";
-                macroCode += "TAG POS=1 TYPE=BODY ATTR=TXT:* EXTRACT=HTM\n";
-                e = iimPlay("CODE:" + macroCode);
-                extract = iimGetLastExtract();
-                
-                if (extract.search(/<h2>user agreement<\/h2>/) > -1) {
-                    macroCode = "TAB T=1\nFRAME F=" + nextFrame + "\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:new_user5 ATTR=NAME:submit&&VALUE:I<SP>agree<SP>--<SP>continue\n";
-                    macroCode += "TAG POS=1 TYPE=BODY ATTR=TXT:* EXTRACT=HTM\n";
-                    e = iimPlay("CODE:" + macroCode);
-                } 
-            
-                if (extract.search(/<h2>Select your assignment type<\/h2>/) > -1) {
-                    macroCode = "TAB T=1\nFRAME F=" + nextFrame + "\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:pa\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit&&VALUE:Next<SP>Step\n";
-                    e = iimPlay("CODE:" + macroCode);
-                }
-            
-                macroCode = "SET !TIMEOUT_STEP 1\n";
-                macroCode += "TAB T=1\nFRAME F=" + nextFrame + "\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
-                macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:display_due_date\n";
-                macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
-                macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
-                macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:31\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Optional<SP>settings\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:generate_reports_1\n";
-                macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:report_gen_speed CONTENT=%" + tiiType + "\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_biblio_exclusion_0\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_quoted_exclusion_0\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_small_matches_1\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:exclude_by_words_radio\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
-                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
-                macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
-                e = iimPlay("CODE:" + macroCode);
-                if (e == 1) {
-                    nextFrame += 2;
-                }
-                if (e != 1) {
-                    macroCode = "SET !TIMEOUT_STEP 1\n";
-                    macroCode += "TAB T=1\nFRAME F={{loop}}\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
-                    macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:display_due_date\n";
-                    macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
-                    macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
-                    macroCode += "TAG POS=21 TYPE=SELECT ATTR=* CONTENT=%11\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:31\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Optional<SP>settings\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:generate_reports_1\n";
-                    macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:report_gen_speed CONTENT=%" + tiiType + "\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_biblio_exclusion_0\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_quoted_exclusion_0\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_small_matches_1\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:exclude_by_words_radio\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
-                    macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
-                    j = 0;
-                    while (true) {
-                        iimSet("loop", j);
-                        if (iimPlay("CODE:" + macroCode) == 1) {
-                            alert(j);
-                            nextFrame = j + 2;
-                            break;
-                        }
-                        j++;
-                    }
-                }
-                addTIIFrame += 2;
-            }
-        
-            // the tii building block does crazy things to the frameset. this gets things back to normal.
-            macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
-            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
-            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
-            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Courses\n";
-            macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:courseManagerFormSearch ATTR=NAME:courseInfoSearchKeyString CONTENT=%CourseId\n";
-            macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:courseManagerFormSearch ATTR=NAME:courseInfoSearchOperatorString CONTENT=%Contains\n";
-            macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerFormSearch ATTR=ID:courseInfoSearchText CONTENT=" + bb9_courseID + "\n";
-            macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:courseManagerFormSearch ATTR=VALUE:Go\n";
-            e = iimPlay("CODE:" + macroCode);
-    
-            macroCode = "TAB T=1\nFRAME F=2\n";
-            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
-            e = iimPlay("CODE:" + macroCode);
-            // end Turnitin
-        } catch(err) {
-            alert(err + " editModeON is having problems.");
         }
     }
 	
@@ -418,7 +281,19 @@ var fixManifestoInstitionItems = function() {
             macroCode = "TAB T=1\nFRAME NAME=\"WFS_Files\"\n";
             macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
             e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();+
+            extract = iimGetLastExtract();
+            
+            artifactRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            artifactLinks.push(createArtifact(/ask_your_instructor\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/faculty_expectations\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/first_course_support\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/first_course_support_final_unit\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/first_course_support_getting_started\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/MBA6004_welcome_and_introductions\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/supplemental_instruction\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/updates_handouts\.html/i, artifactRows));
+            artifactLinks.push(createArtifact(/welcome_and_introductions\.html/i, artifactRows));
+            
             macroCode = "FRAME NAME=\"WFS_Navigation\"\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Institution<SP>Content\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:institution\n";
@@ -593,10 +468,10 @@ var fixManifestoInstitionItems = function() {
         
         try {
             contentLIs = captureContentAreas();
-            artifact = getArtifact(/policies_procedures\.html/i, artifactLinks);
             
+            artifact = getArtifact(/policies_procedures\.html/i, artifactLinks);
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/policies_procedures\.html/) != -1) {
+                if (contentLIs[j].search(/Policies and Procedures/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -624,7 +499,7 @@ var fixManifestoInstitionItems = function() {
         }
     }
     
-    var fixReviewSyllabus = function(artifactLinks) {
+    var fixReviewCourseContent = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
         var extract = "";
@@ -637,7 +512,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/review_syllabus_and_project\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/review_syllabus_and_project\.html|review_syllabus\.html/) != -1) {
+                if (contentLIs[j].search(/Review Course Content|Review Syllabus/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -661,7 +536,7 @@ var fixManifestoInstitionItems = function() {
             }
             return
         } catch(err) {
-            alert(err + "\nSomething went wrong with fixReviewSyllabus");
+            alert(err + "\nSomething went wrong with fixReviewCourseContent");
         }
     }
     
@@ -678,7 +553,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/welcome_and_introductions\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/welcome_and_introductions\.html/) != -1) {
+                if (contentLIs[j].search(/Welcome and Introductions/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -719,7 +594,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/faculty_expectations\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/faculty_expectations\.html/) != -1) {
+                if (contentLIs[j].search(/Faculty Expectations/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -760,7 +635,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/updates_handouts\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/updates_handouts\.html/) != -1) {
+                if (contentLIs[j].search(/Updates and Handouts/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -801,7 +676,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/ask_your_instructor\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/ask_your_instructor\.html/) != -1) {
+                if (contentLIs[j].search(/Ask Your Instructor/) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -992,12 +867,261 @@ var fixManifestoInstitionItems = function() {
             alert(err + "\nSomething went wrong with fixFCSFinalUnit");
         }
     }
+
+    var addTII = function(celesteData, bb9_courseID) {
+        var x = 0;
+    
+        var createTIIAssignments = function(celesteData, bb9_courseID) {
+            var i = 0;
+            var j = 0;
+            var macroCode = "";
+            var e = 0;
+            var turnitinData = celesteData[3];
+
+            var buildTIIAssignment = function(turnitinData) {
+                var macroCode = "";
+                var e = "";
+                var extract = "";
+                var tiiTitle = turnitinData[0];
+                var tiiType = turnitinData[1];
+                var bbframe = 0;
+                var tiiframe = 0;
+        
+                try {
+                    lnavButtonClick("Turnitin");
+            
+                    macroCode = "SET !TIMEOUT_STEP 1\n";
+                    macroCode += "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=UL ATTR=ID:content_listContainer EXTRACT=HTM\n";
+                    iimPlay("CODE:" + macroCode);
+                    extract = iimGetLastExtract();
+            
+                    if (extract.search(tiiTitle) == -1) {
+                        macroCode = "SET !TIMEOUT_STEP 1\n";
+                        macroCode += "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
+                        e = iimPlay("CODE:" + macroCode);
+                
+                
+                        macroCode = "SET !TIMEOUT_STEP 1\n";
+                        macroCode += "TAB T=1\nFRAME F=5\n";
+                        macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:ibox_form_header EXTRACT=HTM\n";
+                        e = iimPlay("CODE:" + macroCode);
+                        extract = iimGetLastExtract();
+                    
+                        if (extract.search(/<h2>user agreement<\/h2>/i) > -1) {
+                            macroCode = "TAB T=1\nFRAME F=" + tiiframe + "\n";
+                            macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:new_user5 ATTR=NAME:submit&&VALUE:I<SP>agree<SP>--<SP>continue\n";
+                            macroCode += "TAG POS=1 TYPE=BODY ATTR=TXT:* EXTRACT=HTM\n";
+                            e = iimPlay("CODE:" + macroCode);
+                        }
+            
+                        if (extract.search(/<h2>Select your assignment type<\/h2>/) > -1) {
+                            macroCode = "TAB T=1\nFRAME F=5\n";
+                            macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:pa\n";
+                            macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit&&VALUE:Next<SP>Step\n";
+                            e = iimPlay("CODE:" + macroCode);
+                        }
+            
+                        macroCode = "SET !TIMEOUT_STEP 1\n";
+                        macroCode += "TAB T=1\nFRAME F=5\n"
+                        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
+                        macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:due_link\n";
+                        macroCode += "TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
+                        macroCode += "TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
+                        macroCode += "TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:31\n";
+                        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:https://ne.edgecastcdn.net/800404/www.turnitin.com/image_bin/icons/cms/turnitin/small_16/expand.gif\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:generate_reports_1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:report_gen_speed CONTENT=%" + tiiType + "\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_small_matches_1\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
+                        macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
+                        e = iimPlay("CODE:" + macroCode);
+                        if (e!=1) {
+                            throw e;
+                        }
+                    
+                        // the tii building block does crazy things to the frameset. this gets things back to normal.
+                        macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
+                        macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Courses\n";
+                        e = iimPlay("CODE:" + macroCode);
+    
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
+                        e = iimPlay("CODE:" + macroCode);
+                    
+                        lnavButtonClick("Turnitin");
+                    
+                    } else {
+                        return
+                    }
+            
+        
+                } catch(err) {
+                    alert(err + ": buildTIIAssignment is having problems.");
+                }
+            }
+    
+            try {
+                for (i = 0; i < turnitinData.length; i++) {
+                    buildTIIAssignment(turnitinData[i]);
+                }
+            } catch(err) {
+                alert(err + ": createTIIAssignments is having problems.");
+            }
+        }
+    
+        // hides the turnitin assignment columns 
+        var hideTIIColumns = function(celesteData) {
+            var macroCode = "";
+            var e = "";
+            var extract = "";
+            var thCols = [];
+            var i = 0;
+            var tiiCols = [];
+            var j = 0;
+            var turnitinData = celesteData[3];
+    
+            var screenReaderON = function() {
+                var macroCode = "";
+                var e = "";
+                var extract = "";
+        
+                try {
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:pageTitleBar EXTRACT=HTM\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    extract = iimGetLastExtract();
+    
+                    if (extract.search(/Screen Reader Mode Active/) == -1) {
+                
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + extract.match(/cmlink_\w{32}/) + "\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turn<SP>Screen<SP>Reader<SP>Mode<SP>On\n";
+                        macroCode += "WAIT SECONDS=4\n";
+                        e = iimPlay("CODE:" + macroCode);
+                    }
+                } catch(err) {
+                    alert(err + " screenReaderON is having problems.");
+                }
+            }
+    
+            try {
+                macroCode = "SET !TIMEOUT_STEP 1\n";
+                macroCode += "TAB T=1\nFRAME F=2\n";		
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.grade.center_groupExpanderLink\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    macroCode = "TAB T=1\nFRAME F=2\n";		
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.grade.center_groupExpanderLink\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            
+                screenReaderON();
+    
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "WAIT SECONDS=4\n";
+                macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+    
+                thCols = extract.match(/<th[\s\S]+?<\/th>/g);
+                thCols = thCols.slice(Math.max(thCols.length - turnitinData.length, 1));
+    
+                for (i = thCols.length - 1; i > thCols.length - (turnitinData.length + 1); i--) {	
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + thCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    extract = iimGetLastExtract();
+        
+                    tiiCols = extract.match(/<th[\s\S]+?<\/th>/g);
+                    tiiCols = tiiCols.slice(Math.max(tiiCols.length - turnitinData.length, 1));
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[tiiCols.length - 1].match(/cmlink_.+?(?=")/) + "\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Edit<SP>Column<SP>Information\n";
+                    e = iimPlay("CODE:" + macroCode);
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:item_definition_form ATTR=ID:scrollableNo\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:item_definition_form ATTR=ID:visibleNo\n";
+                    macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:item_definition_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    macroCode += "WAIT SECONDS=1\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+    
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+    
+                thCols = extract.match(/<th[\s\S]+?<\/th>/g);
+                thCols = thCols.slice(Math.max(thCols.length - turnitinData.length, 1));
+
+                for (i = thCols.length - 1; i > thCols.length - (turnitinData.length + 1); i--) {	
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + thCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:table1_accessible EXTRACT=HTM\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    extract = iimGetLastExtract();
+        
+                    tiiCols = extract.match(/<th[\s\S]+?<\/th>/g);
+                    tiiCols = tiiCols.slice(Math.max(tiiCols.length - turnitinData.length, 1));
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[i].match(/cmlink_.+?(?=")/) + "\n";
+                    e = iimPlay("CODE:" + macroCode);
+        
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:" + tiiCols[tiiCols.length - 1].match(/cmlink_.+?(?=")/) + "\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column\n";
+                    macroCode += "WAIT SECONDS=3\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+                return
+            } catch(err) {
+                alert(err + ": hideTIIColumns is having problems.");
+            }
+        }
+    
+        try {
+            createTIIAssignments(celesteData, bb9_courseID);
+            hideTIIColumns(celesteData)
+            x++;
+        } catch(err) {
+            alert(err + ": addTII is having problems.");
+        }
+    }
     
     try {
     	editModeON();
+    	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", "BPA4107"));
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        
         for (i = 0; i < contentAreas.length; i++) {
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
@@ -1006,7 +1130,7 @@ var fixManifestoInstitionItems = function() {
             fixPrint(artifactLinks);
             fixAccordion();
             fixPoliciesProcedures(artifactLinks);
-            fixReviewSyllabus(artifactLinks);
+            fixReviewCourseContent(artifactLinks);
             fixWelcomeIntroductions(artifactLinks);
             fixFacultyExpectations(artifactLinks);
             fixUpdatesHandouts(artifactLinks);
@@ -1016,6 +1140,7 @@ var fixManifestoInstitionItems = function() {
             fixFCS(artifactLinks);
             fixFCSFinalUnit(artifactLinks);
         }
+        addTII(celesteData);
         return
     } catch(err) {
         alert(err + "\nSomething went wrong with fixManifestoInstitionItems");
