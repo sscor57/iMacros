@@ -1,0 +1,700 @@
+// replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
+var addIIMSpaces = function(anyStringWithSpaces) {
+    var newString = "";
+  newString = anyStringWithSpaces.replace(/ /g,"<SP>");
+	return newString
+}
+
+// replaces iMacros space entity ('<SP>') in a string with a space character (' ').
+var removeIIMSpaces = function(anyStringWithIIMSpaces) {
+    var newString = "";
+	newString = anyStringWithIIMSpaces.replace(/<SP>/g," ");
+	return newString
+}
+//Find Sections to do work in
+// extracts the table of search results for course search
+var searchExtract = function() {
+	try {
+		var macroCode = "";
+		var i = "";
+		var e = "";	
+		var extract = "";
+		var rowsToScan = new Array;
+		var contextualMenuIdNumber = "";
+        var userName = prompt("Please enter your Username","abianchi1");
+
+		macroCode = "TAB T=1\nFRAME F=2\n";
+   	 	macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+		
+		for (i=0;i<rowsToScan.length;i++) {
+			macroCode = "TAB T=1\nFRAME F=2\n";
+   	 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+			macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+					
+			
+			contextualMenuIdNumber = rowsToScan[i].match(/cmlink_(\w{32})/)[1];
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:admin_course_list_users\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Enroll<SP>Users\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:myForm ATTR=ID:userName CONTENT="+userName+"\n";
+			macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:myForm ATTR=ID:courseRoleId CONTENT=%C\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:myForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
+       		e = iimPlay("CODE:" + macroCode);
+			
+			}
+		
+  	 	} catch (err) {
+	    errorMessage += "\nuserSearch() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+var setPermissions = function() {
+		try {
+		var macroCode = "";
+		var e = "";	
+		var extract = "";
+		var permissionRows = new Array;
+		var i = 0;
+		var cmPermissions = "";
+		
+		macroCode = "TAB T=1\nFRAME F=2\n";
+   	 	macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		permissionRows = extract.match(/<tr .+?<\/tr>/g);
+		
+		for (i=0;i<permissionRows.length;i++) {
+// enter the sections folder
+			macroCode = "TAB T=1\nFRAME F=2\n";
+			macroCode += "TAB T=1\nFRAME NAME=\"nav\"\n";
+			macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Content<SP>Collection\n";
+			macroCode += "TAB T=1\nFRAME NAME=\"WFS_Navigation\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:courses\n";
+			macroCode += "TAB T=1\nFRAME NAME=\"WFS_Files\"\n";
+   	 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:filesForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";	
+			macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+
+			
+			e = iimPlay("CODE:" + macroCode);
+			
+			extract = iimGetLastExtract();
+			
+			permissionRows = extract.match(/<tr .+?<\/tr>/g);
+					
+			
+			cmPermissions = permissionRows[i].match(/cmlink_(\w{32})/)[1];
+			macroCode = "TAB T=1\nFRAME NAME=\"WFS_Files\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmPermissions+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:permissions_tool\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:actionitembutton.*.label\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:actionmenuitem.*.1\n";
+			macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:adduserlistform ATTR=ID:prms_source_select CONTENT=%_121_1:%_123_1:%_120_1:%_124_1:%_122_1:%_1_1\n";
+			macroCode += "TAG POS=1 TYPE=BUTTON ATTR=TITLE:Move<SP>to<SP>list<SP>of<SP>selected<SP>items&&TYPE:button\n";
+			macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:adduserlistform ATTR=NAME:top_Submit&&VALUE:Submit\n";
+			macroCode += "WAIT SECONDS=1\n";
+
+			e = iimPlay("CODE:" + macroCode);
+			
+			}
+	}
+	
+	catch (err) {
+		errorText += "Fac. Instructions error: "+err.setPermissions+".";
+	}
+}
+
+var setGradebook = function(){
+		try {
+		var macroCode = "";
+		var e = "";	
+		var extract = "";
+		var rowsToScan = new Array;
+		var contextualMenuIdNumber = "";
+
+		macroCode = "TAB T=1\nFRAME F=2\n";
+   	 	macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+		
+		for (i=0;i<rowsToScan.length;i++) {
+	
+			macroCode = "TAB T=1\nFRAME F=2\n";
+   	 		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   			macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+			macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+					
+			contextualMenuIdNumber = rowsToScan[i].match(/cmlink_(\w{32})/)[1];
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:openItem*\n";
+       		e = iimPlay("CODE:" + macroCode);
+			
+			gradebook();
+
+			
+			macroCode = "TAB T=1\n TAB CLOSE\n";
+			e = iimPlay("CODE:" + macroCode);
+			
+			}		
+	} catch (err) {
+	    errorMessage += "\nuserSearch() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+
+var gradebook = function() {
+    var macroCode = "";
+    var e = "";
+    var extract = "";
+    var gradingTableRows = [];
+    var i = 0;
+    var gradedDiscussions = [];
+    
+		
+    // smartview operations.
+    var smartViews = function() {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contextualMenuIdNumber = "";
+        var smartViewRows = [];
+        
+        var extractSmartViewRows = function() {
+            var macroCode = "";
+            var e = "";
+            var extract = "";
+            var smartViewRows = [];
+            
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "WAIT SECONDS=2\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+        
+            smartViewRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            return smartViewRows
+        }
+        
+        var editSmartview = function(title, newTitle) {
+            var macroCode = "";
+            var e = "";
+            var smartViewRows = [];
+            var currentTitle = "";
+            var contextualMenuIdNumber = "";
+            
+            smartViewRows = extractSmartViewRows();
+            currentTitle = ">" + title + "<";
+            for (i = 0; i < smartViewRows.length; i++) {
+                if (smartViewRows[i].search(currentTitle) != - 1) {
+                    contextualMenuIdNumber = smartViewRows[i].match(/cmlink_(\w{32})/)[1];
+
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+                    macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:context_menu_tag_item1_" + contextualMenuIdNumber + "\n";
+					macroCode += "WAIT SECONDS=2\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    
+                    if (newTitle === "Assignments") {
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+            			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dataCollectionContainer EXTRACT=HTM\n";
+           				e = iimPlay("CODE:" + macroCode);
+           				extract = iimGetLastExtract();
+           				tdCode = extract.match(/<label for\=\"categorySel[\s\S]+?<\/td>/);
+	                	assignCode = tdCode[0].match(/[0-9]{4,5}/g)[0];
+			
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
+						macroCode += "WAIT SECONDS=1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%"+assignCode+"\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:filterQueryCriteria CONTENT=%ALL\n";
+                        e = iimPlay("CODE:" + macroCode);
+                    }
+					
+                    if (newTitle === "Discussions") {
+                        
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+            			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dataCollectionContainer EXTRACT=HTM\n";
+           				e = iimPlay("CODE:" + macroCode);
+           				extract = iimGetLastExtract();
+           				alert(extract);
+           				tdCode = extract.match(/<label for\=\"categorySel[\s\S]+?<\/td>/);
+           				alert(tdCode);
+	               		assignCode = tdCode[0].match(/[0-9]{4,5}/g)[2];
+						alert(assignCode);
+                        
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
+						macroCode += "WAIT SECONDS=1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%"+assignCode+"\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
+                        e = iimPlay("CODE:" + macroCode);
+                    }
+
+                      if (newTitle === "Quizzes") {
+                        macroCode = "TAB T=1\nFRAME F=2\n";
+            			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dataCollectionContainer EXTRACT=HTM\n";
+           				e = iimPlay("CODE:" + macroCode);
+           				extract = iimGetLastExtract();
+		           		tdCode = extract.match(/<label for\=\"categorySel[\s\S]+?<\/td>/);
+	          		    assignCode = tdCode[0].match(/[0-9]{4,5}/g)[7];
+	
+						macroCode = "TAB T=1\nFRAME F=2\n";
+                        macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:custom_view_form ATTR=ID:status\n";
+						macroCode += "WAIT SECONDS=1\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:categorySel CONTENT=%"+assignCode+"\n";
+                        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:userSel CONTENT=%all\n";
+                        e = iimPlay("CODE:" + macroCode);
+                    }
+                    
+                    macroCode = "TAB T=1\nFRAME F=2\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:AddModifyCustomViewsForm ATTR=ID:name CONTENT=" + newTitle + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:AddModifyCustomViewsForm ATTR=ID:favoriteCbox CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:custom_view_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+        }
+        
+        try {
+            macroCode = "TAB T=1\nFRAME F=2\n";
+			macroCode += "WAIT SECONDS=4\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Manage\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Smart<SP>Views\n";
+            e = iimPlay("CODE:" + macroCode);
+
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:manage_views_form ATTR=ID:listContainer_selectAll CONTENT=YES\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Favorites\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Remove<SP>from<SP>Favorites\n";
+            e = iimPlay("CODE:" + macroCode);
+
+            editSmartview("Assignments", "Assignments");
+            editSmartview("Discussion Boards", "Discussions");
+            editSmartview("Tests", "Quizzes");
+            
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
+            e = iimPlay("CODE:" + macroCode);
+
+            progressMessage += "\n";
+            return
+        } catch(err) {
+            alert(err + " editSmartView is having problems.");
+        }
+    }
+
+        macroCode = "TAB T=1\nFRAME F=2\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.grade.center_groupExpanderLink\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
+        e = iimPlay("CODE:" + macroCode);
+        
+        smartViews();
+		removeColumns();
+		
+}
+
+var lnavButtonClick = function(button) {
+    var macroCode = "";
+    e = 0;
+    var iimButton = "";
+
+try {
+        iimButton = addIIMSpaces(button);
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + iimButton + "\n";
+        e = iimPlay("CODE:" + macroCode);
+        return
+    } catch(err) {
+        alert(err + " lnavButtonClick is having problems.");
+    }
+}
+
+var unenrollStep = function() {
+    try {
+  		var errorMessage = "";
+		var progressMessage = "";
+        var bb9_courseID = null;
+        var userName = null;
+		
+		userName = userSearch(userName);
+		editPagingSearchResults("user*Form");
+		userSearchExtract();
+		editPagingSearchResults("user*Form");
+		userEnrollmentsExtract(userName);
+
+		
+    } catch(err) {
+	    errorMessage += "\nunenrollStep() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+
+
+// extracts the table of search results for user search
+var userSearchExtract = function() {
+	try {
+		var macroCode = "";
+		var e = "";	
+		var extract = "";
+		var rowsToScan = new Array;
+		var i = 0;
+		var contextualMenuIdNumber = "";
+		
+		macroCode = "TAB T=1\nFRAME F=2\n";
+   	 	macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+		
+		for (i=0;i<rowsToScan.length;i++) {
+			contextualMenuIdNumber = rowsToScan[i].match(/cmlink_(\w{32})/)[1];
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:list_courses_by_user\n";
+       		e = iimPlay("CODE:" + macroCode);
+
+        }
+		
+	} catch (err) {
+	    errorMessage += "\nuserSearch() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+
+
+// extracts the table of search results for user enrollments
+var userEnrollmentsExtract = function(userName) {
+	try {
+		var macroCode = "";
+		var e = "";	
+		var extract = "";
+		var rowsToScan = new Array;
+		var i = 0;
+		var contextualMenuIdNumber = "";
+		
+		macroCode = "TAB T=1\nFRAME F=2\n";
+   	 	macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+   		macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+   		macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+		macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+		e = iimPlay("CODE:" + macroCode);
+		extract = iimGetLastExtract();
+		rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+		
+		for (i=0;i<rowsToScan.length;i++) {
+			contextualMenuIdNumber = rowsToScan[i].match(/cmlink_(\w{32})/)[1];
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:manage_"+contextualMenuIdNumber+"\n";
+       		e = iimPlay("CODE:" + macroCode);
+			
+			editPagingSearchResults("enrollmentsForm");
+
+			macroCode = "TAB T=1\nFRAME F=2\n";
+			macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			usernameRowsToScan = extract.match(/<tr .+?<\/tr>/g);
+			
+			for (j=0;j<usernameRowsToScan.length;j++) {
+				if (usernameRowsToScan[j].search(userName) != -1) {
+
+					contextualMenuIdNumber = usernameRowsToScan[j].match(/cmlink_(\w{32})/)[1];
+					macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+					macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+contextualMenuIdNumber+"\n";
+					macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+					macroCode += "TAG POS=1 TYPE=A ATTR=ID:deleteItem_"+contextualMenuIdNumber+"\n";
+					e = iimPlay("CODE:" + macroCode);
+				
+				}
+			}
+			
+			userSearchExtract();
+		
+			macroCode = "TAB T=1\nFRAME F=2\n";
+			macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+        }
+		
+	} catch (err) {
+	    errorMessage += "\nuserSearch() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+
+//remove Weighted and Total Columns
+	var removeColumns = function() {
+		var cmScreenReader = "";
+		var macroCode = "";
+		var e = "";	
+		var extract = "";
+		var cmColumns = "";
+		var i = 0;
+		var cmWeighted = "";
+		var tHead = "";
+			
+//Find Screen Reader
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:pageTitleBar EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			cmScreenReader = extract.match(/cmlink_(\w{32})/)[1];	
+//Turn it On
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmScreenReader+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:standardMenuItem*\n";
+			macroCode += "WAIT SECONDS=1\n";
+			e = iimPlay("CODE:" + macroCode);
+
+//Open Weighted Grading Column Options
+
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			
+//Edit Weighted Column
+
+			if (extract.match(/cmlink_(\w{32}_0_5)/) != null) {
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];
+					
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "WAIT SECONDS=1\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Edit<SP>Column<SP>Information\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manage_cumulative_form ATTR=ID:scorableNo\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manage_cumulative_form ATTR=ID:visibleNo\n";
+				macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manage_cumulative_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+				macroCode += "WAIT SECONDS=2\n";				
+				e = iimPlay("CODE:" + macroCode);
+			}
+			else {
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Weighted<SP>Total\n";
+				macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+				e = iimPlay("CODE:" + macroCode);
+				extract = iimGetLastExtract();
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];
+			
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "WAIT SECONDS=1\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Edit<SP>Column<SP>Information\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manage_cumulative_form ATTR=ID:scorableNo\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manage_cumulative_form ATTR=ID:visibleNo\n";
+				macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manage_cumulative_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+				macroCode += "WAIT SECONDS=2\n";
+				e = iimPlay("CODE:" + macroCode);
+				
+			}
+//Hide Weighted Column
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			
+			if (extract.match(/cmlink_(\w{32}_0_5)/) != null) {
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];
+			
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column\n";
+				macroCode += "WAIT SECONDS=2\n";
+				e = iimPlay("CODE:" + macroCode);
+			}
+			
+			else {
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Weighted<SP>Total\n";
+				macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+				e = iimPlay("CODE:" + macroCode);
+				extract = iimGetLastExtract();
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];
+				
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column\n";
+				macroCode += "WAIT SECONDS=2\n";
+				e = iimPlay("CODE:" + macroCode);
+			}
+//Edit Total Column	
+
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			
+			if (extract.match(/cmlink_(\w{32}_0_5)/) != null) {
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];
+				
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "WAIT SECONDS=1\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Edit<SP>Column<SP>Information\n";
+				macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manage_cumulative_form ATTR=ID:visibleNo\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manage_cumulative_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+				macroCode += "WAIT SECONDS=2\n";
+				e = iimPlay("CODE:" + macroCode);
+			}
+			else {
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Total\n";
+				macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+				e = iimPlay("CODE:" + macroCode);
+				extract = iimGetLastExtract();
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];				
+
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Edit<SP>Column<SP>Information\n";
+				macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:manage_cumulative_form ATTR=ID:visibleNo\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:manage_cumulative_form ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+				macroCode += "WAIT SECONDS=2\n";
+				e = iimPlay("CODE:" + macroCode);
+			}
+
+//Hide Total Column
+
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			
+			if (extract.match(/cmlink_(\w{32}_0_5)/) != null) {
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];
+				
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";		
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column\n";
+				macroCode += "WAIT SECONDS=3\n";
+				e = iimPlay("CODE:" + macroCode);
+			}
+			else {
+
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Total\n";
+				macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:table1_accessible_container EXTRACT=HTM\n";
+				e = iimPlay("CODE:" + macroCode);
+				extract = iimGetLastExtract();
+				cmWeighted = extract.match(/cmlink_(\w{32}_0_5)/)[1];	
+				
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";		
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmWeighted+"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column\n";
+				macroCode += "WAIT SECONDS=3\n";
+				e = iimPlay("CODE:" + macroCode);
+			}
+
+
+//Turn Screen Reader Off	
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:pageTitleBar EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			
+			cmScreenReader = extract.match(/cmlink_(\w{32})/)[1];			
+			macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_"+cmScreenReader+"\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:standardMenuItem*\n";
+			macroCode += "WAIT SECONDS=1\n";
+			e = iimPlay("CODE:" + macroCode);
+
+        macroCode = "TAB T=1\nFRAME F=2\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.grade.center_groupExpanderLink\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
+        e = iimPlay("CODE:" + macroCode);
+	}
+
+
+// navigates the user search tool
+var userSearch = function(userName) {
+	try {
+		var macroCode = "";
+		var e = "";	
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
+        macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Users\n";
+        e = iimPlay("CODE:" + macroCode);
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:userManagerSearchForm ATTR=ID:userInfoSearchKeyString CONTENT=%UserName\n";
+        macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:userManagerSearchForm ATTR=ID:userInfoSearchOperatorString CONTENT=%Equals\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:userManagerSearchForm ATTR=ID:search_text CONTENT="+userName+"\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:userManagerSearchForm ATTR=VALUE:Go\n";
+        e = iimPlay("CODE:" + macroCode);
+		return userName
+	} catch (err) {
+	    errorMessage += "\nuserSearch() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+
+
+// edits user search results page display number to equal 1000
+var editPagingSearchResults = function(formName) {
+	try {
+		var macroCode = "";
+		var e = "";	
+		
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:"+formName+" ATTR=ID:listContainer_numResults CONTENT=1000\n"; 
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+        e = iimPlay("CODE:" + macroCode);
+	} catch (err) {
+	    errorMessage += "\nuserSearch() says: "+err.message+"\n";
+    	alert(errorMessage);
+	}
+}
+
+
+//Enroll into courses
+//searchExtract();
+
+//Set Permissions
+//setPermissions();
+
+//enter gradebook
+setGradebook();
+
+//Unenroll
+//unenrollStep();
