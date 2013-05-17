@@ -45,6 +45,23 @@ var editModeON = function() {
     }
 }
 
+var getBB9_courseID = function() {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    
+    try {
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:courseMenuPalette_paletteTitleHeading EXTRACT=TXT\n";
+        e = iimPlay("CODE:" + macroCode);
+        extract = iimGetLastExtract();
+        bb9_courseID = extract.match(/TEMPLATE_[A-Z]+?\d{3,4}_\d{5}/)[0];
+        return bb9_courseID
+    } catch(err) {
+        alert(err + ": getBB9_courseID is having problems.");
+    }
+}
+
 // clicks on a left nav buttons title text.
 var lnavButtonClick = function(button) {
     var macroCode = "";
@@ -471,7 +488,7 @@ var fixManifestoInstitionItems = function() {
             
             artifact = getArtifact(/policies_procedures\.html/i, artifactLinks);
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Policies and Procedures/) != -1) {
+                if (contentLIs[j].search(/Policies and Procedures</) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -551,9 +568,9 @@ var fixManifestoInstitionItems = function() {
         try {
             contentLIs = captureContentAreas();
             artifact = getArtifact(/welcome_and_introductions\.html/i, artifactLinks);
-            
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Welcome and Introductions/) != -1) {
+                if (contentLIs[j].search(/>Welcome and Introductions</) != -1) {
+            alert(contentLIs[j]);
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -594,7 +611,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/faculty_expectations\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Faculty Expectations/) != -1) {
+                if (contentLIs[j].search(/>Faculty Expectations</) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -635,7 +652,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/updates_handouts\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Updates and Handouts/) != -1) {
+                if (contentLIs[j].search(/Updates and Handouts</) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -676,7 +693,7 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/ask_your_instructor\.html/i, artifactLinks);
             
             for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Ask Your Instructor/) != -1) {
+                if (contentLIs[j].search(/>Ask Your Instructor</) != -1) {
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
@@ -865,6 +882,55 @@ var fixManifestoInstitionItems = function() {
             return
         } catch(err) {
             alert(err + "\nSomething went wrong with fixFCSFinalUnit");
+        }
+    }
+    
+    var enrollInCourseID = function(userName, bb9_courseID, role) {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contextualMenuIdNumber = "";
+
+        try {
+            macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
+            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Courses\n";
+            macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:courseManagerFormSearch ATTR=NAME:courseInfoSearchKeyString CONTENT=%CourseId\n";
+            macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:courseManagerFormSearch ATTR=NAME:courseInfoSearchOperatorString CONTENT=%Contains\n";
+            macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerFormSearch ATTR=ID:courseInfoSearchText CONTENT=" + bb9_courseID + "\n";
+            macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:courseManagerFormSearch ATTR=VALUE:Go\n";
+            e = iimPlay("CODE:" + macroCode);
+        
+            macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+        
+            if (extract.match(/cmlink_(\w{32})/) != null && extract.search(userName) === -1) {
+                contextualMenuIdNumber = extract.match(/cmlink_(\w{32})/)[1];
+        
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:admin_course_list_users\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Enroll<SP>Users\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:myForm ATTR=ID:userName CONTENT=" + userName + "\n";
+                macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:myForm ATTR=ID:courseRoleId CONTENT=%" + role + "\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:myForm ATTR=NAME:top_Submit&&VALUE:Submit\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
+                e = iimPlay("CODE:" + macroCode);
+        
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:TEMPLATE_BPA4107_00003\n";
+                e = iimPlay("CODE:" + macroCode);	
+                return true
+            } else if (extract.search(userName) != -1) {
+                return true
+            } else {
+                return false
+            }
+        } catch(err) {
+            alert(err + " enrollInCourseID is having problems.");
         }
     }
 
@@ -1119,9 +1185,12 @@ var fixManifestoInstitionItems = function() {
     
     try {
     	editModeON();
+    	bb9_courseID = addIIMSpaces(getBB9_courseID());
+    	enrollInCourseID(prompt("Enter your user ID:", "cswope"), bb9_courseID, "C");
     	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", "BPA4107"));
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
+        /*
         for (i = 0; i < contentAreas.length; i++) {
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
@@ -1140,7 +1209,8 @@ var fixManifestoInstitionItems = function() {
             fixFCS(artifactLinks);
             fixFCSFinalUnit(artifactLinks);
         }
-        addTII(celesteData);
+        addTII(celesteData, bb9_courseID);
+        */
         return
     } catch(err) {
         alert(err + "\nSomething went wrong with fixManifestoInstitionItems");

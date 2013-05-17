@@ -2120,10 +2120,41 @@ var addTII = function(celesteData, bb9_courseID) {
 	}
 }
 
+var courseNameInProgress = function(bb9_courseID) {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    var bb9_courseName = "";
+        
+    try {
+        macroCode = "SET !TIMEOUT_STEP 1\n";
+	    macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.customization_groupExpanderLink\n";
+		macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Properties\n";
+		e = iimPlay("CODE:" + macroCode);
+		if (e != 1) {
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.customization_groupExpanderLink\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Properties\n";
+            e = iimPlay("CODE:" + macroCode);
+		}
+		
+        macroCode = "SET !TIMEOUT_STEP 1\n";
+	    macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:myForm ATTR=ID:courseName CONTENT=" + bb9_courseID + "_INPROGRESS" + "\n";
+        macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:myForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+        macroCode += "PAUSE\n";
+		e = iimPlay("CODE:" + macroCode);
+    } catch(err) {
+        alert(err + ": courseNameInProgress is having problems.");
+    }
+}
+
 courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
 celesteData = celesteDataCapture(courseID);
 cycleThroughLNav(celesteData); // edit unitOperations() to add/remove an operation
 gradebook(celesteData);
 addTII(celesteData, bb9_courseID);
+courseNameInProgress(bb9_courseID);
 unenrollInCourseID(bb9_courseID);
