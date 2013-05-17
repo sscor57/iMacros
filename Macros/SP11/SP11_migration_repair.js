@@ -56,7 +56,7 @@ var getBB9_courseID = function() {
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
         
-        bb9_courseID = extract.match(/TEMPLATE_[A-Z]+?\d{3,4}_\d{5}/)[0];
+        bb9_courseID = extract.match(/TEMPLATE_\w+?\d+?(?:\w+?-\w+?)*_\d+/)[0];
         return bb9_courseID
     } catch(err) {
         alert(err + ": getBB9_courseID is having problems.");
@@ -80,7 +80,7 @@ var lnavButtonClick = function(button) {
     }
 }
 
-var fixManifestoInstitionItems = function() {
+var templateSetup = function() {
 	var macroCode = "";
 	var e = 0;
 	var contentAreas = [];
@@ -266,6 +266,11 @@ var fixManifestoInstitionItems = function() {
             
             macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Content<SP>Collection\n";
+            e = iimPlay("CODE:" + macroCode);
+            
+            macroCode = "FRAME NAME=\"WFS_Navigation\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Institution<SP>Content\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:institution\n";
             e = iimPlay("CODE:" + macroCode);
             
             macroCode = "TAB T=1\nFRAME NAME=\"WFS_Files\"\n";
@@ -571,8 +576,8 @@ var fixManifestoInstitionItems = function() {
             artifact = getArtifact(/welcome_and_introductions\.html/i, artifactLinks);
             for (j = 0; j < contentLIs.length; j++) {
                 if (contentLIs[j].search(/>Welcome and Introductions</) != -1) {
-            alert(contentLIs[j]);
                     contextualMenuIdNumber = contentLIs[j].match(/cmlink_(\w{32})/)[1];
+                    
                     macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:edit_" + contextualMenuIdNumber + "\n";
@@ -637,6 +642,307 @@ var fixManifestoInstitionItems = function() {
             return
         } catch(err) {
             alert(err + "\nSomething went wrong with fixFacultyExpectations");
+        }
+    }
+    
+    var rebuildUpdatesHandouts = function(discussionInfo) {
+        var macroCode = "";
+        var e = 1;
+        var i = 0;
+        var contentType = 0;
+        var xID = "";
+        var fileName = "";
+        var linkTitle = "";
+        var artifact = "";
+        var discussionTopics = [];
+
+        var toggleCreateNewForum = function() {
+            var macroCode = "";
+            var e = "";
+
+            try {    	
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Create<SP>New<SP>Forum\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    throw e;
+                }
+                return
+            } catch(err) {
+                alert(err + ": toggleCreateNewForum is having problems.");
+            }
+        }
+    
+        var toggleDiscussionTool = function() {
+            var macroCode = "";
+            var e = 0;
+        
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Tools\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Discussion<SP>Board\n";
+            e = iimPlay("CODE:" + macroCode);
+            return
+        }
+    
+        var buildDiscussion = function() {
+            var macroCode = "";
+            var e = 0;
+    
+            try {
+                toggleDiscussionTool();
+                toggleCreateNewForum();
+
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:title CONTENT=" + addIIMSpaces(linkTitle) + "\n";
+                macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+                macroCode += "TAB T=2\n";
+                macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    throw "Something went wrong submitting " + linkTitle + ".";
+                }
+        
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorRemove CONTENT=YES\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorModify CONTENT=YES\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:allow2\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:include1\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:nograde\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    throw "Something went wrong creating " + linkTitle + ".";
+                }
+
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
+                macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+                macroCode += "TAB T=2\n";
+                macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    throw "Something went wrong submitting " + linkTitle + ".";
+                }
+        
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    throw "Something went wrong adding " + linkTitle + " to it's content area.";
+                }
+                return
+            } catch(err) {
+                alert(err + ": buildDiscussion is having problems.");
+            }
+        }
+    
+        var courseWideDiscussion = function(linkTitle, artifact) {
+            var macroCode = "";
+            var e = 0;
+            var extract = "";
+            var discOptions = [];
+            var i = 0;
+            var searchPattern = new RegExp;
+        
+            try {
+                toggleDiscussionTool();
+                if (linkTitle.search(/Ask Your Instructor/) != -1) {
+                    searchPattern = linkTitle.match(/Ask Your Instructor/);
+                }
+            
+                if (linkTitle.search(/Updates and Handouts/) != -1) {
+                    searchPattern = linkTitle.match(/Updates and Handouts/);
+                }
+        
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:itemId EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+            
+                discOptions = extract.match(/<option[\s\S]+?<\/option>/g);
+            
+                if (extract.search(searchPattern) != - 1) {
+                    for (i = 0; i < discOptions.length; i++) {
+                        if (discOptions[i].search(searchPattern) != -1) {
+                            discID = discOptions[i].match(/_\d+?_1/g);
+                        }
+                    }
+                
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:addItemFormId ATTR=ID:rTool_1\n";
+                    macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:addItemForm ATTR=ID:itemId CONTENT=%" + discID + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:course_link ATTR=ID:specific_link_name CONTENT=" + addIIMSpaces(linkTitle) + "\n";
+                    macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code&&TXT:\n";
+                    macroCode += "TAB T=2\n";
+                    macroCode += "FRAME F=0\n";
+                    macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + artifact + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw "Something went wrong submitting " + linkTitle + ".";
+                    }
+
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw "Something went wrong reusing " + linkTitle + " to it's content area.";
+                    }
+                }
+            
+                if (extract.search(searchPattern) == -1) {
+                    toggleCreateNewForum();
+                    title = linkTitle.match(searchPattern)[0];
+                
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:forumForm ATTR=ID:title CONTENT=" + addIIMSpaces(title) + "\n";
+                    macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+                    macroCode += "TAB T=2\n";
+                    macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + artifact + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw "Something went wrong submitting " + title + ".";
+                    }
+
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorRemove CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:forumForm ATTR=ID:isAllowAuthorModify CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:allow2\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:include1\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=NAME:forumForm ATTR=ID:nograde\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw "Something went wrong creating " + title + ".";
+                    }
+
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:addItemFormId ATTR=NAME:top_Next&&VALUE:Next\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:course_link ATTR=ID:specific_link_name CONTENT=" + addIIMSpaces(linkTitle) + "\n";
+                    macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+                    macroCode += "TAB T=2\n";
+                    macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces(artifact) + "\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw "Something went wrong submitting " + linkTitle + ".";
+                    }
+
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:course_link ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        throw "Something went wrong adding " + linkTitle + " to it's content area.";
+                    }
+                }
+                return
+            } catch(err) {
+                alert(err + ": courseWideDiscussion is having problems.");
+            }
+        }
+
+        var UHReorder = function() {
+            var macroCode = "";
+            var e = 0;
+            var extract = "";
+            var pageOptions = [];
+            var i = 0;
+            
+            try {
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Keyboard<SP>Accessible<SP>Reordering:<SP>Content\n";
+                macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:pageListReorderControlSelect EXTRACT=HTM\n";
+                e = iimPlay("CODE:" + macroCode);
+                extract = iimGetLastExtract();
+                
+                pageOptions = extract.match(/<option[\s\S]+?<\/option>/g);
+                
+                for (i = 0; i < pageOptions.length; i++) {
+                    if (pageOptions[i].search(/Unit \d{1,2} Updates and Handouts/) != -1) {
+                        orderID = pageOptions[i].match(/_\d+?_1/)[0];
+                    }
+                }
+                
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:pageListReorderControlSelect CONTENT=%" + orderID + "\n";
+                macroCode += "TAG POS=1 TYPE=BUTTON ATTR=TITLE:Move<SP>Up&&TYPE:button&&TXT:\n";
+                macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                macroCode += "TAG POS=1 TYPE=BUTTON ATTR=TXT:Submit\n";
+                e = iimPlay("CODE:" + macroCode);
+                return
+            } catch(err) {
+                alert(err + ": UHReorder is having problems.");
+            }
+        }
+
+        try {
+            contentType = discussionInfo[0];
+            xID = discussionInfo[1];
+            fileName = discussionInfo[2];
+            linkTitle = discussionInfo[3];
+            artifact = addIIMSpaces("<div class=\"capellaDrawer\">" + discussionInfo[4] + "</div>");
+        
+            if (xID == 1651) {
+                courseWideDiscussion(linkTitle, artifact);
+                UHReorder();
+            } else {
+                buildDiscussion(linkTitle, artifact);
+                UHReorder();
+            }
+            return
+        } catch(err) {
+            alert(err + " rebuildUpdatesHandouts is having problems.");
+        }
+    }
+    
+    var deleteUpdatesHandouts = function(artifactLinks) {
+        var macroCode = "";
+        var e = 0;
+        var extract = "";
+        var artifact = "";
+        var contentLIs = [];
+        var contextualMenuIdNumber = "";
+    
+        try {
+            lnavButtonClick("Discussions");
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";    
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+            macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:conferenceForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+            e = iimPlay("CODE:" + macroCode);
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            contentLIs = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            artifact = getArtifact(/updates_handouts\.html/i, artifactLinks);
+            
+            for (j = 0; j < contentLIs.length; j++) {
+                if (contentLIs[j].search(/Updates and Handouts/) != -1) {
+                    checkbox = contentLIs[j].match(/listContainer_formCBs_\d+?_1/)[0];
+            
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:conferenceForm ATTR=ID:" + checkbox + " CONTENT=YES\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+            
+            if (extract.search(/Updates and Handouts/) != -1) {
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_link_removeListAction_bottom\n";
+                e = iimPlay("CODE:" + macroCode);
+            }
+            return
+        } catch(err) {
+            alert(err + ": deleteUpdatesHandouts is having problems.");
         }
     }
     
@@ -922,7 +1228,7 @@ var fixManifestoInstitionItems = function() {
                 e = iimPlay("CODE:" + macroCode);
         
                 macroCode = "TAB T=1\nFRAME F=2\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:TEMPLATE_BPA4107_00003\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
                 e = iimPlay("CODE:" + macroCode);	
                 return true
             } else if (extract.search(userName) != -1) {
@@ -1184,14 +1490,18 @@ var fixManifestoInstitionItems = function() {
         }
     }
     
+    var unitNum = "";
+    var discussionInfo = [];
+    
     try {
     	editModeON();
     	bb9_courseID = addIIMSpaces(getBB9_courseID());
     	enrollInCourseID(prompt("Enter your user ID:", "cswope"), bb9_courseID, "C");
-    	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", "BPA4107"));
+    	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1]));
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        /*
+        deleteUpdatesHandouts(artifactLinks);
+        
         for (i = 0; i < contentAreas.length; i++) {
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
             macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
@@ -1199,10 +1509,20 @@ var fixManifestoInstitionItems = function() {
             
             fixPrint(artifactLinks);
             fixAccordion();
-            fixPoliciesProcedures(artifactLinks);
-            fixReviewCourseContent(artifactLinks);
-            fixWelcomeIntroductions(artifactLinks);
-            fixFacultyExpectations(artifactLinks);
+
+            if (contentAreas[i].search(/Getting Started/) != -1) {
+                fixPoliciesProcedures(artifactLinks);
+                fixReviewCourseContent(artifactLinks);
+                fixWelcomeIntroductions(artifactLinks);
+                fixFacultyExpectations(artifactLinks);
+            }
+
+            if (contentAreas[i].search(/Unit \d{1,2}/) != -1) {
+                unitNum = contentAreas[i].match(/Unit (\d{1,2})/)[1];
+                discussionInfo = [6, 1651, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-1651_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
+                rebuildUpdatesHandouts(discussionInfo);
+            }
+
             fixUpdatesHandouts(artifactLinks);
             fixAskYourInstructor(artifactLinks);
             fixSupplementalInstruction(artifactLinks);
@@ -1211,11 +1531,10 @@ var fixManifestoInstitionItems = function() {
             fixFCSFinalUnit(artifactLinks);
         }
         addTII(celesteData, bb9_courseID);
-        */
         return
     } catch(err) {
-        alert(err + "\nSomething went wrong with fixManifestoInstitionItems");
+        alert(err + "\nSomething went wrong with templateSetup");
     }
 }
 
-fixManifestoInstitionItems();
+templateSetup();
