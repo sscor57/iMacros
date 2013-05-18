@@ -113,7 +113,6 @@ var templateSetup = function() {
             macroCode = "TAB OPEN\n";
             macroCode += "TAB T=2\n";
             macroCode += "URL GOTO=https://celeste.capella.edu\n";
-            alert("Log into Celeste and click Continue in your iMacros controls.");
             macroCode += "PAUSE\n";
             e = iimPlay("CODE:" + macroCode);
         
@@ -1269,7 +1268,7 @@ var templateSetup = function() {
                     iimPlay("CODE:" + macroCode);
                     extract = iimGetLastExtract();
             
-                    if (extract.search(tiiTitle) == -1) {
+                    if (extract.search(tiiTitle) === -1) {
                         macroCode = "SET !TIMEOUT_STEP 1\n";
                         macroCode += "TAB T=1\nFRAME F=2\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
@@ -1321,7 +1320,13 @@ var templateSetup = function() {
                         if (e!=1) {
                             throw e;
                         }
+                        
+                        macroCode = "TAB T=1\nREFRESH\n\n";
+                        e = iimPlay("CODE:" + macroCode);
                     
+                        lnavButtonClick("Turnitin");
+                    
+                        /*
                         // the tii building block does crazy things to the frameset. this gets things back to normal.
                         macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
@@ -1334,7 +1339,7 @@ var templateSetup = function() {
                         e = iimPlay("CODE:" + macroCode);
                     
                         lnavButtonClick("Turnitin");
-                    
+                        */
                     } else {
                         return
                     }
@@ -1346,6 +1351,9 @@ var templateSetup = function() {
             }
     
             try {
+            
+                
+            
                 for (i = 0; i < turnitinData.length; i++) {
                     buildTIIAssignment(turnitinData[i]);
                 }
@@ -1496,7 +1504,7 @@ var templateSetup = function() {
     try {
     	editModeON();
     	bb9_courseID = addIIMSpaces(getBB9_courseID());
-    	enrollInCourseID(prompt("Enter your user ID:", "cswope"), bb9_courseID, "C");
+    	enrollInCourseID(prompt("Enter your user ID:", "CP_cswope"), bb9_courseID, "C");
     	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1]));
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();

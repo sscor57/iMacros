@@ -1,5 +1,21 @@
-﻿TAB T=1
-FRAME F=2
-TAG POS=1 TYPE=A ATTR=ID:cmlink_e01bda3e8ee348828826db5086d9cb68_0_14
-TAG POS=1 TYPE=A ATTR=TITLE:Hide<SP>Column
-WAIT SECONDS=3
+﻿SET !TIMEOUT_STEP 1
+TAB T=1
+FRAME F=5
+TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=[u03a2]<SP>Unit<SP>3<SP>Assignment<SP>2
+TAG POS=1 TYPE=SPAN ATTR=ID:due_link
+TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11
+TAG POS=1 TYPE=A ATTR=TXT:>>
+TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11
+TAG POS=1 TYPE=A ATTR=TXT:>>
+TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11
+TAG POS=1 TYPE=A ATTR=TXT:31
+TAG POS=1 TYPE=IMG ATTR=SRC:https://ne.edgecastcdn.net/800404/www.turnitin.com/image_bin/icons/cms/turnitin/small_16/expand.gif
+TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1
+TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:generate_reports_1
+TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:report_gen_speed CONTENT=%final
+TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:use_small_matches_1
+TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8
+TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1
+TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0
+TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit
+TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1

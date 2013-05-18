@@ -1858,11 +1858,11 @@ var gradebook = function(celesteData) {
         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Full<SP>Grade<SP>Center\n";
         e = iimPlay("CODE:" + macroCode);
         
-        smartViews();
 		discussionParticipationCol(gradedDiscussions);
 		currentGradeCol(gradingTableRows, gradedDiscussions);
 		finalGradeCol(gradingTableRows, gradedDiscussions);
 		arrangeColumns();
+        smartViews();
 		
 		progressMessage += "\n";
 		return
@@ -2143,7 +2143,6 @@ var courseNameInProgress = function(bb9_courseID) {
 	    macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:myForm ATTR=ID:courseName CONTENT=" + bb9_courseID + "_INPROGRESS" + "\n";
         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:myForm ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
-        macroCode += "PAUSE\n";
 		e = iimPlay("CODE:" + macroCode);
     } catch(err) {
         alert(err + ": courseNameInProgress is having problems.");
