@@ -105,7 +105,7 @@ var templateSetup = function() {
         var assignmentRows = [];
         var assignment = [];
         var assignments = [];
-        var assignmentCode = "";
+        var assignmentTitle = "";
         var assNum = "";
         var assType = "";
     
@@ -121,7 +121,7 @@ var templateSetup = function() {
             macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dialogHolder EXTRACT=HTM\n";
             e = iimPlay("CODE:" + macroCode);
             extract = iimGetLastExtract();
-        
+            
             assignedRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
             for (i = 0; i < assignedRows.length; i++) {
                 if (assignedRows[i].search(courseID) != -1) {
@@ -199,17 +199,14 @@ var templateSetup = function() {
             assignmentRows = extract.match(/<li[\s\S]+?<\/li>/g);
         
             for (i = 0; i < assignmentRows.length; i++) {
-                assignmentCode = assignmentRows[i].match(/u\d{2}a\d{1,2}/)[0];
-                unitNum = assignmentCode.match(/u(\d{2})a\d{1,2}/)[1];
-                assNum = assignmentCode.match(/u\d{2}a(\d{1,2})/)[1];
-                unitNum++;
-                unitNum--;
+                assignmentTitle = assignmentRows[i].match(/u\d{2}a\d{1,2}: *[\s\S]+?(?=<\/a>)/)[0];
+                
                 if (assignmentRows[i].search(/draft/i) > -1) {
                     assType = "draft";
                 } else {
                     assType = "final";
                 }
-                assignment = ["[" + assignmentCode + "] Unit " + unitNum + " Assignment " + assNum, assType];
+                assignment = [assignmentTitle, assType];
                 assignments.push(assignment);
             }
         
@@ -378,13 +375,19 @@ var templateSetup = function() {
         var contentLIs = [];
         
         try {
-            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode = "SET !TIMEOUT_STEP 1\n";
+            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
             macroCode += "TAG POS=1 TYPE=UL ATTR=ID:content_listContainer EXTRACT=HTM\n";
             e = iimPlay("CODE:" + macroCode);
             extract = iimGetLastExtract();
     
             contentLIs = extract.match(/<li[\s\S]+?<\/li>/g);
-            return contentLIs
+            
+            if (contentLIs === null) {
+                return []
+            } else {
+                return contentLIs
+            }
         } catch(err) {
 		    alert(err + "\nSomething went wrong with captureContentAreas");
 		}
@@ -884,14 +887,26 @@ var templateSetup = function() {
             fileName = discussionInfo[2];
             linkTitle = discussionInfo[3];
             artifact = addIIMSpaces("<div class=\"capellaDrawer\">" + discussionInfo[4] + "</div>");
-        
+            
+            macroCode = "SET !TIMEOUT_STEP 1\n";
+            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=UL ATTR=ID:content_listContainer EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            if (extract.search(/Updates and Handouts</) != -1) {
+                return
+            }
+    
+            contentLIs = extract.match(/<li[\s\S]+?<\/li>/g);
+            
             if (xID == 1651) {
                 courseWideDiscussion(linkTitle, artifact);
-                UHReorder();
             } else {
                 buildDiscussion(linkTitle, artifact);
-                UHReorder();
             }
+            
+            UHReorder();
             return
         } catch(err) {
             alert(err + " rebuildUpdatesHandouts is having problems.");
@@ -1256,7 +1271,6 @@ var templateSetup = function() {
                 var extract = "";
                 var tiiTitle = turnitinData[0];
                 var tiiType = turnitinData[1];
-                var bbframe = 0;
                 var tiiframe = 0;
         
                 try {
@@ -1275,7 +1289,6 @@ var templateSetup = function() {
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
                         e = iimPlay("CODE:" + macroCode);
                 
-                
                         macroCode = "SET !TIMEOUT_STEP 1\n";
                         macroCode += "TAB T=1\nFRAME F=5\n";
                         macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:ibox_form_header EXTRACT=HTM\n";
@@ -1283,7 +1296,7 @@ var templateSetup = function() {
                         extract = iimGetLastExtract();
                     
                         if (extract.search(/<h2>user agreement<\/h2>/i) > -1) {
-                            macroCode = "TAB T=1\nFRAME F=" + tiiframe + "\n";
+                            macroCode = "TAB T=1\nFRAME F=5\n";
                             macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:new_user5 ATTR=NAME:submit&&VALUE:I<SP>agree<SP>--<SP>continue\n";
                             macroCode += "TAG POS=1 TYPE=BODY ATTR=TXT:* EXTRACT=HTM\n";
                             e = iimPlay("CODE:" + macroCode);
@@ -1321,12 +1334,6 @@ var templateSetup = function() {
                             throw e;
                         }
                         
-                        macroCode = "TAB T=1\nREFRESH\n\n";
-                        e = iimPlay("CODE:" + macroCode);
-                    
-                        lnavButtonClick("Turnitin");
-                    
-                        /*
                         // the tii building block does crazy things to the frameset. this gets things back to normal.
                         macroCode = "TAB T=1\nFRAME NAME=\"nav\"\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:System<SP>Admin<SP>*\n";
@@ -1339,7 +1346,7 @@ var templateSetup = function() {
                         e = iimPlay("CODE:" + macroCode);
                     
                         lnavButtonClick("Turnitin");
-                        */
+                        return
                     } else {
                         return
                     }
@@ -1351,9 +1358,6 @@ var templateSetup = function() {
             }
     
             try {
-            
-                
-            
                 for (i = 0; i < turnitinData.length; i++) {
                     buildTIIAssignment(turnitinData[i]);
                 }
@@ -1498,6 +1502,55 @@ var templateSetup = function() {
         }
     }
     
+    var UHCheck = function() {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contentAreas = [];
+        
+        try {
+            
+            lnavButtonClick("Discussions");
+            
+            macroCode = "SET !TIMEOUT_STEP 1\n";
+            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:listContainer_datatable EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            if (extract.match(/Updates and Handouts</g) === null) {
+                return false
+            }
+            if (extract.match(/Updates and Handouts</g).length > 1) {
+                return true
+            } else {
+                return false
+            }
+        } catch(err) {
+            alert(err + "\n: UHCheck is having problems.");
+        }
+    }
+    
+    var tiiCheck = function(celesteData) {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contentAreas = [];
+        var tiiData = celesteData[3];
+        
+        try {        
+            lnavButtonClick("Turnitin");
+            if (captureContentAreas().length === null) {
+                return false
+            } else if (captureContentAreas().length != tiiData.length) {
+                return true
+            }
+        } catch(err) {
+            alert(err + "\n: tiiCheck is having problems.");
+        }
+    }
+    
+    var bb9_courseID = "";
     var unitNum = "";
     var discussionInfo = [];
     
@@ -1506,15 +1559,16 @@ var templateSetup = function() {
     	bb9_courseID = addIIMSpaces(getBB9_courseID());
     	enrollInCourseID(prompt("Enter your user ID:", "CP_cswope"), bb9_courseID, "C");
     	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1]));
+        if (tiiCheck(celesteData)) {
+            addTII(celesteData, bb9_courseID);
+        }
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        deleteUpdatesHandouts(artifactLinks);
-        
+        if (UHCheck()) {
+            deleteUpdatesHandouts(artifactLinks);
+        }
         for (i = 0; i < contentAreas.length; i++) {
-            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-            macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:" + addIIMSpaces(contentAreas[i]) + "\n";
-            e = iimPlay("CODE:" + macroCode);
-            
+            lnavButtonClick(contentAreas[i]);
             fixPrint(artifactLinks);
             fixAccordion();
 
@@ -1523,22 +1577,20 @@ var templateSetup = function() {
                 fixReviewCourseContent(artifactLinks);
                 fixWelcomeIntroductions(artifactLinks);
                 fixFacultyExpectations(artifactLinks);
+                fixFCSGettingStarted(artifactLinks);
             }
 
             if (contentAreas[i].search(/Unit \d{1,2}/) != -1) {
                 unitNum = contentAreas[i].match(/Unit (\d{1,2})/)[1];
                 discussionInfo = [6, 1651, "updates_handouts.html", "Unit " + unitNum + " Updates and Handouts", "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-1651_1\" target=\"_blank\" alt=\"\">updates_handouts.html</a>"];
                 rebuildUpdatesHandouts(discussionInfo);
+                fixUpdatesHandouts(artifactLinks);
+                fixAskYourInstructor(artifactLinks);
+                fixFCS(artifactLinks);
+                fixFCSFinalUnit(artifactLinks);
+                fixSupplementalInstruction(artifactLinks);
             }
-
-            fixUpdatesHandouts(artifactLinks);
-            fixAskYourInstructor(artifactLinks);
-            fixSupplementalInstruction(artifactLinks);
-            fixFCSGettingStarted(artifactLinks);
-            fixFCS(artifactLinks);
-            fixFCSFinalUnit(artifactLinks);
         }
-        addTII(celesteData, bb9_courseID);
         return
     } catch(err) {
         alert(err + "\nSomething went wrong with templateSetup");
