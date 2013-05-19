@@ -1,6 +1,6 @@
 /*
 Instructions: log into any SP11 instance of BB9, navigate to a course or template, launch the macro.
-*///
+*/
 
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
@@ -221,6 +221,93 @@ var templateSetup = function() {
             return celesteData
         } catch(err) {
             alert(err + " celesteDataCapture is having problems.");
+        }
+    }
+    
+    var xIDs = function() {
+        var macroCode = "";
+        var e = 0;
+        var artifactInfo = new Array;
+        var contentInfo = new Array;
+        var extract = "";
+        var rowsToScan = new Array;
+        var i = 0;
+        var contentType = 0; // 0 = print artifact, 1 = unitX_introduction.html, 2 = unitX_objectives.html, 3 = accordion, 4 = study, 5 = assignment, 6 = discussion, 7 = quiz
+        var xID = "";
+        var fileName = "";
+        var linkTitle = "";
+        var artifact = "";
+    
+        try {
+            lnavButtonClick("Getting Started");
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Getting<SP>Started\n";
+            macroCode += "TAG POS=1 TYPE=SELECT ATTR=ID:discoverObjectTypePicker CONTENT=%html\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Go\n";
+            macroCode += "WAIT SECONDS=2\n";
+            macroCode += "TAB T=1\n";
+            macroCode += "TAB T=2\n";
+            macroCode += "FRAME F=0\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+            macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:catForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Authors\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Name\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            macroCode += "TAB T=1\n";
+            macroCode += "TAB T=2\n";
+            macroCode += "TAB CLOSE\n";
+            e = iimPlay("CODE:" + macroCode);		
+            extract = iimGetLastExtract();
+            if (e != 1) {
+                throw e;
+            }
+
+            rowsToScan = extract.match(/<tr .+?<\/tr>/g);
+        
+            for (i = 0; i < rowsToScan.length; i++) {
+                xID = rowsToScan[i].match(/xythos_id=(\d*)_1/)[1];
+                
+                if (rowsToScan[i].search(/u\d{2}s\d{1,2}\.html/) != -1) {
+                    contentType = 4;
+                    fileName = rowsToScan[i].match(/u\d{2}s\d{1,2}\.html/)[0];
+                    linkTitle = fileName;
+                    artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+                    artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
+                    contentInfo.push(artifactInfo);
+                }
+                
+                if (rowsToScan[i].search(/u\d{2}a\d{1,2}\.html/) != -1) {
+                    contentType = 5;
+                    fileName = rowsToScan[i].match(/u\d{2}a\d{1,2}\.html/)[0];
+                    linkTitle = "View Assignment Instructions";
+                    artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+                    artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
+                    contentInfo.push(artifactInfo);
+                }
+            
+                if (rowsToScan[i].search(/u\d{2}d\d{1,2}\.html/) != -1) {
+                    contentType = 6;
+                    fileName = rowsToScan[i].match(/u\d{2}d\d{1,2}\.html/)[0];
+                    linkTitle = fileName;
+                    artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+                    artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
+                    contentInfo.push(artifactInfo);
+                }
+            
+                if (rowsToScan[i].search(/u\d{2}q\d{1,2}\.html/) != -1) {
+                    contentType = 7;
+                    fileName = rowsToScan[i].match(/u\d{2}q\d{1,2}\.html/)[0];
+                    linkTitle = fileName;
+                    artifact = "<a target=\"_blank\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" artifacttype=\"html\">" + linkTitle + "</a>";
+                    artifactInfo = [contentType, xID, fileName, linkTitle, artifact];
+                    contentInfo.push(artifactInfo);
+                }
+            }
+            return contentInfo
+        } catch(err) {
+            alert(err + "\n: xIDs is having problems.");
         }
     }
 	
@@ -644,6 +731,35 @@ var templateSetup = function() {
             return
         } catch(err) {
             alert(err + "\nSomething went wrong with fixFacultyExpectations");
+        }
+    }
+    
+    var updatesHandoutsCheck = function() {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contentAreas = [];
+        
+        try {
+            
+            lnavButtonClick("Discussions");
+            
+            macroCode = "SET !TIMEOUT_STEP 1\n";
+            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:listContainer_datatable EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            if (extract.match(/Updates and Handouts</g) === null) {
+                return false
+            }
+            if (extract.match(/Updates and Handouts</g).length > 1) {
+                return true
+            } else {
+                return false
+            }
+        } catch(err) {
+            alert(err + "\n: updatesHandoutsCheck is having problems.");
         }
     }
     
@@ -1502,35 +1618,6 @@ var templateSetup = function() {
         }
     }
     
-    var UHCheck = function() {
-        var macroCode = "";
-        var e = "";
-        var extract = "";
-        var contentAreas = [];
-        
-        try {
-            
-            lnavButtonClick("Discussions");
-            
-            macroCode = "SET !TIMEOUT_STEP 1\n";
-            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
-            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:listContainer_datatable EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-            
-            if (extract.match(/Updates and Handouts</g) === null) {
-                return false
-            }
-            if (extract.match(/Updates and Handouts</g).length > 1) {
-                return true
-            } else {
-                return false
-            }
-        } catch(err) {
-            alert(err + "\n: UHCheck is having problems.");
-        }
-    }
-    
     var tiiCheck = function(celesteData) {
         var macroCode = "";
         var e = "";
@@ -1553,20 +1640,21 @@ var templateSetup = function() {
     var bb9_courseID = "";
     var unitNum = "";
     var discussionInfo = [];
+    var contentInfo = [];
     
     try {
     	editModeON();
     	bb9_courseID = addIIMSpaces(getBB9_courseID());
     	enrollInCourseID(prompt("Enter your user ID:", "CP_cswope"), bb9_courseID, "C");
+    	contentInfo = xIDs();
     	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1]));
-        if (tiiCheck(celesteData)) {
-            addTII(celesteData, bb9_courseID);
-        }
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        if (UHCheck()) {
+        
+        if (updatesHandoutsCheck()) {
             deleteUpdatesHandouts(artifactLinks);
         }
+        
         for (i = 0; i < contentAreas.length; i++) {
             lnavButtonClick(contentAreas[i]);
             fixPrint(artifactLinks);
@@ -1590,6 +1678,10 @@ var templateSetup = function() {
                 fixFCSFinalUnit(artifactLinks);
                 fixSupplementalInstruction(artifactLinks);
             }
+        }
+        
+    	if (tiiCheck(celesteData)) {
+            addTII(celesteData, bb9_courseID);
         }
         return
     } catch(err) {
