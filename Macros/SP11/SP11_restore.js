@@ -8,7 +8,7 @@ var bb9_courseID = null;
 var numberOfUnits = 0;
 var numberOfProjects = 0;
 var courseID = null;
-var userName = "cswope";
+var userName = null;
 var celesteData = [];
 
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
