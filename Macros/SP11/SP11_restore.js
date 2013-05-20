@@ -42,7 +42,7 @@ var editModeON = function() {
     var extract = "";
     
     try{
-		macroCode = "TAB T=1\nFRAME F=2\n";
+    	macroCode = "TAB T=1\nFRAME F=2\n";
 		macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText EXTRACT=HTM\n";
 		e = iimPlay("CODE:" + macroCode);
 		extract = iimGetLastExtract();
@@ -986,7 +986,7 @@ var celesteDataCapture = function(courseID) {
         e = iimPlay("CODE:" + macroCode);
     
         macroCode = "TAG POS=1 TYPE=A ATTR=ID:assToMe_Nav\n";
-        macroCode += "WAIT SECONDS=2\n";
+        macroCode += "WAIT SECONDS=3\n";
         macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dialogHolder EXTRACT=HTM\n";
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
@@ -997,9 +997,9 @@ var celesteDataCapture = function(courseID) {
                 linkID = assignedRows[i].match(/assToMeContentLink-\d+/);
             
                 macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
-                macroCode += "WAIT SECONDS=2\n";
+                macroCode += "WAIT SECONDS=3\n";
                 macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-                macroCode += "WAIT SECONDS=2\n";
+                macroCode += "WAIT SECONDS=3\n";
                 macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
                 e = iimPlay("CODE:" + macroCode);
             }
@@ -1035,13 +1035,13 @@ var celesteDataCapture = function(courseID) {
             for (i = 0; i < projectTitles.length; i++) {
                 components = [];
                 macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "WAIT SECONDS=2\n";
                 macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
-                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "WAIT SECONDS=2\n";
                 macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
-                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "WAIT SECONDS=2\n";
                 macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
-                macroCode += "WAIT SECONDS=1\n";
+                macroCode += "WAIT SECONDS=2\n";
                 macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
                 e = iimPlay("CODE:" + macroCode);
                 extract = iimGetLastExtract();
@@ -1058,9 +1058,9 @@ var celesteDataCapture = function(courseID) {
         assignments.push(["2 - Draft", "draft"])
     
         macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-        macroCode += "WAIT SECONDS=2\n";
+        macroCode += "WAIT SECONDS=3\n";
         macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Activities\n";
-        macroCode += "WAIT SECONDS=2\n";
+        macroCode += "WAIT SECONDS=3\n";
         macroCode += "TAG POS=1 TYPE=UL ATTR=ID:assignmentsList EXTRACT=HTM\n";
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
