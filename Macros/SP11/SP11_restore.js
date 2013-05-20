@@ -61,11 +61,10 @@ var editModeON = function() {
             if (e != 1) {
                 throw "Failed to turn on Edit Mode.";
             }
-            progressMessage += "Turned on edit mode.\n";
 		    return
 		}
     } catch(err) {
-        alert(err + " editModeON is having problems.");
+        alert(err + ":\n editModeON is having problems.");
     }
 }
 
@@ -112,7 +111,7 @@ var courseUpdates = function() {
 		e = iimPlay("CODE:" + macroCode);
 		
     } catch(err) {
-        alert(err + " courseUpdates is having problems.");
+        alert(err + ":\n courseUpdates is having problems.");
     }
 }
 
@@ -197,7 +196,7 @@ var xIDs = function() {
 		progressMessage += "";
 		return contentInfo
     } catch(err) {
-        alert(err + " xIDs is having problems.");
+        alert(err + ":\n xIDs is having problems.");
     }
 }
 
@@ -270,7 +269,7 @@ var cycleThroughLNav = function(celesteData) {
 		progressMessage += "Content areas are set up.\n";
 		return
     } catch(err) {
-        alert(err + " cycleThroughLNav is having problems.");
+        alert(err + ":\n cycleThroughLNav is having problems.");
     }
 }
 
@@ -287,21 +286,12 @@ var lnavButtonClick = function(button) {
         e = iimPlay("CODE:" + macroCode);
         return
     } catch(err) {
-        alert(err + " lnavButtonClick is having problems.");
+        alert(err + ":\n lnavButtonClick is having problems.");
     }
 }
 
 // adds all assignments, graded discussion topics, and the common ungraded discussions to unit content areas, in that order.
 var unitOperations = function(unitNum, contentInfo, unitTitle) {
-    var macroCode = "";
-    var e = 0;
-    var extract = "";
-    var j = 0;
-    var unitInfo = [];
-    var assignments = [];
-    var discussions = [];
-    var quizzes = [];
-    var discussionInfo = [];
     
     var setUnitTitle = function(title) {
         var macroCode = "";
@@ -362,6 +352,16 @@ var unitOperations = function(unitNum, contentInfo, unitTitle) {
         return artifactList
     }
     
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    var j = 0;
+    var unitInfo = [];
+    var assignments = [];
+    var discussions = [];
+    var quizzes = [];
+    var discussionInfo = [];
+    
     try {
         unitInfo = assembleUnitInfo(unitNum, contentInfo);
         assignments = artifactByContentType(5, unitInfo);
@@ -388,7 +388,7 @@ var unitOperations = function(unitNum, contentInfo, unitTitle) {
 		addUngradedDiscussion(discussionInfo);
 		return
     } catch(err) {
-        alert(err + " unitOperations is having problems.");
+        alert(err + ":\n unitOperations is having problems.");
     }
 }
 
@@ -521,7 +521,7 @@ var addDiscussion = function(unitNum, discussionInfo) {
         progressMessage += title + ": added\n";
 		return
     } catch(err) {
-        alert(err + " addDiscussion is having problems.");
+        alert(err + ":\n addDiscussion is having problems.");
     }
 }
 
@@ -566,21 +566,12 @@ var addQuiz = function(unitNum, quizInfo) {
         progressMessage += title + ": added\n";
 		return
     } catch(err) {
-        alert(err + " addQuiz is having problems.");
+        alert(err + ":\n addQuiz is having problems.");
     }
 }
 
 // adds discussions that are not included in the grading equation.
 var addUngradedDiscussion = function(discussionInfo) {
-    var macroCode = "";
-    var e = 1;
-    var i = 0;
-    var contentType = 0;
-    var xID = "";
-    var fileName = "";
-    var linkTitle = "";
-    var artifact = "";
-    var discussionTopics = [];
 
     var toggleCreateNewForum = function() {
         var macroCode = "";
@@ -595,7 +586,7 @@ var addUngradedDiscussion = function(discussionInfo) {
             }
             return
         } catch(err) {
-            alert(err + ": toggleCreateNewForum is having problems.");
+            alert(err + ":\n toggleCreateNewForum is having problems.");
         }
     }
     
@@ -658,7 +649,7 @@ var addUngradedDiscussion = function(discussionInfo) {
                 throw "Something went wrong adding " + linkTitle + " to it's content area.";
             }
         } catch(err) {
-            alert(err + ": buildDiscussion is having problems.");
+            alert(err + ":\n buildDiscussion is having problems.");
         }
     }
     
@@ -765,10 +756,20 @@ var addUngradedDiscussion = function(discussionInfo) {
             }
 			return
 		} catch(err) {
-			alert(err + ": courseWideDiscussion is having problems.");
+			alert(err + ":\n courseWideDiscussion is having problems.");
 		}
     }
 
+    var macroCode = "";
+    var e = 1;
+    var i = 0;
+    var contentType = 0;
+    var xID = "";
+    var fileName = "";
+    var linkTitle = "";
+    var artifact = "";
+    var discussionTopics = [];
+    
     try {
         contentType = discussionInfo[0];
         xID = discussionInfo[1];
@@ -866,7 +867,7 @@ var projectOperations = function(projectNum, contentInfo, projectTitle, componen
         addComponents(components, contentInfo);
 		return
     } catch(err) {
-        alert(err + " projectOperations is having problems.");
+        alert(err + ":\n projectOperations is having problems.");
     }
 }
 
@@ -951,7 +952,7 @@ var templateInfo = function() {
 		numberOfProjects = projects.length;
 		return courseID
     } catch(err) {
-        alert(err + " templateInfo is having problems.");
+        alert(err + ":\n templateInfo is having problems.");
     }
 }
 
@@ -1088,7 +1089,7 @@ var celesteDataCapture = function(courseID) {
     
         return celesteData
     } catch(err) {
-        alert(err + " celesteDataCapture is having problems.");
+        alert(err + ":\n celesteDataCapture is having problems.");
     }
 }
 
@@ -1177,7 +1178,7 @@ var xIDs = function() {
 		progressMessage += "";
 		return contentInfo
     } catch(err) {
-        alert(err + " xIDs is having problems.");
+        alert(err + ":\n xIDs is having problems.");
     }
 }
 
@@ -1223,7 +1224,7 @@ var goToCourseID = function(bb9_courseID, userName) {
         }
 		return
     } catch(err) {
-        alert(err + " goToCourseID is having problems.");
+        alert(err + ":\n goToCourseID is having problems.");
     }
 }
 
@@ -1263,7 +1264,7 @@ var enrollInCourseID = function(userName, role) {
 			return false
 		}
     } catch(err) {
-        alert(err + " enrollInCourseID is having problems.");
+        alert(err + ":\n enrollInCourseID is having problems.");
     }
 }
 
@@ -1327,27 +1328,15 @@ var unenrollInCourseID = function(templateID) {
 		progressMessage += "Un-enrolled " + userName + " from: " + templateID + ".\n";
 		return
     } catch(err) {
-        alert(err + " unenrollInCourseID is having problems.");
+        alert(err + ":\n unenrollInCourseID is having problems.");
     }
 }
 
 // controls all the gradebook setup operations.
 var gradebook = function(celesteData) {
-    var macroCode = "";
-    var e = "";
-    var extract = "";
-    var gradingTableRows = [];
-    var i = 0;
-    var gradedDiscussions = [];
-	var turnitinData = celesteData[3];
     
     // smartview operations.
     var smartViews = function() {
-        var macroCode = "";
-        var e = "";
-        var extract = "";
-        var contextualMenuIdNumber = "";
-        var smartViewRows = [];
         
         var extractSmartViewRows = function() {
             var macroCode = "";
@@ -1418,6 +1407,12 @@ var gradebook = function(celesteData) {
             }
         }
         
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contextualMenuIdNumber = "";
+        var smartViewRows = [];
+        
         try {
             macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Manage\n";
@@ -1441,7 +1436,7 @@ var gradebook = function(celesteData) {
             progressMessage += "\n";
             return
         } catch(err) {
-            alert(err + " editSmartView is having problems.");
+            alert(err + ":\n editSmartView is having problems.");
         }
     }
     
@@ -1460,6 +1455,7 @@ var gradebook = function(celesteData) {
 		
         try {
             macroCode = "TAB T=1\nFRAME F=2\n";
+            macroCode += "WAIT SECONDS=5\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Create<SP>Calculated<SP>Column\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Weighted<SP>Column\n";
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:manageCumulativeItemForm ATTR=ID:columnName CONTENT=Discussion<SP>Participation\n";
@@ -1534,7 +1530,7 @@ var gradebook = function(celesteData) {
 			}
             
         } catch(err) {
-            alert(err + " discussionParticipationCol is having problems.");
+            alert(err + ":\n discussionParticipationCol is having problems.");
         }
     }
     
@@ -1649,7 +1645,7 @@ var gradebook = function(celesteData) {
 			e = iimPlay("CODE:" + macroCode);
             
         } catch(err) {
-            alert(err + " currentGradeCol is having problems.");
+            alert(err + ":\n currentGradeCol is having problems.");
         }
     }
     
@@ -1753,18 +1749,12 @@ var gradebook = function(celesteData) {
             }
             
         } catch(err) {
-            alert(err + " finalGradeCol is having problems.");
+            alert(err + ":\n finalGradeCol is having problems.");
         }
     }
     
     // moves the disc. participation, current grade and final grade columns to the beginning of the gradbook.
 	var arrangeColumns = function() {
-        var macroCode = "";
-        var e = "";
-        var extract = "";
-        var orgRowNum = 0;
-        var reorderItems = [];
-        var id = 0;
         
         var clicks = function(id, numberOfClicks) {
 			var macroCode = "";
@@ -1784,6 +1774,13 @@ var gradebook = function(celesteData) {
         	return
         }
 		
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var orgRowNum = 0;
+        var reorderItems = [];
+        var id = 0;
+        
         try {
 			macroCode = "TAB T=1\nFRAME F=2\n";		
 			macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Manage\n";
@@ -1829,10 +1826,18 @@ var gradebook = function(celesteData) {
 			e = iimPlay("CODE:" + macroCode);
 			return
         } catch(err) {
-            alert(err + " arrangeColumns is having problems.");
+            alert(err + ":\n arrangeColumns is having problems.");
         }
     }
 
+    var macroCode = "";
+    var e = "";
+    var extract = "";
+    var gradingTableRows = [];
+    var i = 0;
+    var gradedDiscussions = [];
+	var turnitinData = celesteData[3];
+	
 	try {
         lnavButtonClick("Syllabus");
         
@@ -1863,19 +1868,14 @@ var gradebook = function(celesteData) {
 		progressMessage += "\n";
 		return
     } catch(err) {
-        alert(err + " gradebook is having problems.");
+        alert(err + ":\n gradebook is having problems.");
     }
 }
 
+// adds turnitin assignments, it also hides the gradebook columns that it creates
 var addTII = function(celesteData, bb9_courseID) {
-    var x = 0;
 
     var createTIIAssignments = function(celesteData, bb9_courseID) {
-        var i = 0;
-        var j = 0;
-        var macroCode = "";
-        var e = 0;
-        var turnitinData = celesteData[3];
 
         var buildTIIAssignment = function(turnitinData) {
             var macroCode = "";
@@ -1962,13 +1962,17 @@ var addTII = function(celesteData, bb9_courseID) {
                 } else {
                     return
                 }
-        
-    
             } catch(err) {
-                alert(err + ": buildTIIAssignment is having problems.");
+                alert(err + ":\n buildTIIAssignment is having problems.");
             }
         }
 
+        var i = 0;
+        var j = 0;
+        var macroCode = "";
+        var e = 0;
+        var turnitinData = celesteData[3];
+        
         try {
             for (i = 0; i < turnitinData.length; i++) {
                 buildTIIAssignment(turnitinData[i]);
@@ -1980,14 +1984,6 @@ var addTII = function(celesteData, bb9_courseID) {
 
     // hides the turnitin assignment columns 
     var hideTIIColumns = function(celesteData) {
-        var macroCode = "";
-        var e = "";
-        var extract = "";
-        var thCols = [];
-        var i = 0;
-        var tiiCols = [];
-        var j = 0;
-        var turnitinData = celesteData[3];
 
         var screenReaderON = function() {
             var macroCode = "";
@@ -2009,10 +2005,19 @@ var addTII = function(celesteData, bb9_courseID) {
                     e = iimPlay("CODE:" + macroCode);
                 }
             } catch(err) {
-                alert(err + " screenReaderON is having problems.");
+                alert(err + ":\n screenReaderON is having problems.");
             }
         }
 
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var thCols = [];
+        var i = 0;
+        var tiiCols = [];
+        var j = 0;
+        var turnitinData = celesteData[3];
+        
         try {
             macroCode = "SET !TIMEOUT_STEP 1\n";
             macroCode += "TAB T=1\nFRAME F=2\n";		
@@ -2101,19 +2106,76 @@ var addTII = function(celesteData, bb9_courseID) {
             }
             return
         } catch(err) {
-            alert(err + ": hideTIIColumns is having problems.");
+            alert(err + ":\n hideTIIColumns is having problems.");
         }
     }
-
+    
     try {
         createTIIAssignments(celesteData, bb9_courseID);
         hideTIIColumns(celesteData)
-        x++;
     } catch(err) {
         alert(err + ": addTII is having problems.");
     }
 }
 
+// makes a copy of the version folder on the institution side so scoring guides and course files links will work
+var copyCC = function(bb9_courseID) {
+    var macroCode = "";
+    var e = 0;
+    var extract = "";
+    var ccTRs = [];
+    var i = 0;
+    var versionFolder = "";
+    var errorMessage = "";
+
+    try {
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.course.files_groupExpanderLink\n";
+        e = iimPlay("CODE:" + macroCode);
+        if (e != 1) {
+            iimPlay("CODE:" + macroCode);
+        }
+        
+        macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=3 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
+        e = iimPlay("CODE:" + macroCode);
+        
+        macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+        macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:listContainer_datatable EXTRACT=HTM\n";
+        e = iimPlay("CODE:" + macroCode);
+        extract = iimGetLastExtract();
+        
+        versionFolder = extract.match(/Version\d{4}/);
+        ccTRs = extract.match(/<tr[\s\S]+?<\/tr>/g);
+        for (i = 0; i < ccTRs.length; i++) {
+            if (ccTRs[i].search(/Version\d{4}</) != -1) {
+                macroCode = "SET !TIMEOUT_STEP 1\n";
+                macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:filesForm ATTR=ID:listContainer_file*/courses/" + bb9_courseID + "/" + versionFolder + " CONTENT=YES\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_link_*_top&&TXT:Copy\n";
+                e = iimPlay("CODE:" + macroCode);
+                if (e != 1) {
+                    errorMessage = "There is a version folder with that name in that location already.\n\n";
+                    errorMessage += "This script can continue to advance, but you will need to fix the paths in all \n";
+                    errorMessage += "links to course files and scoring guides after you rename the folder and copy it\n";
+                    errorMessage += "to it's course folder (/institution/";
+                    errorMessage += bb9_courseID.match(/_(\w+?)\d+?(?:\w+?-\w+?)*_/)[1] + "/" + bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1] + ").";
+                    throw errorMessage;
+                }
+                
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:destination ATTR=ID:targetPath_CSFile CONTENT=/institution/" + bb9_courseID.match(/_(\w+?)\d+?(?:\w+?-\w+?)*_/)[1] + "/" + bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1] + "/\n";
+                macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:destination ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                e = iimPlay("CODE:" + macroCode);
+            }
+        }
+        return
+    } catch(err) {
+        alert("copyCC is having problems.\n" + err);
+    }
+}
+
+// appends "_INPROGRESS" to the course name
 var courseNameInProgress = function(bb9_courseID) {
     var macroCode = "";
     var e = 0;
@@ -2145,6 +2207,7 @@ var courseNameInProgress = function(bb9_courseID) {
 
 courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
+copyCC(bb9_courseID);
 celesteData = celesteDataCapture(courseID);
 cycleThroughLNav(celesteData); // edit unitOperations() to add/remove an operation
 gradebook(celesteData);

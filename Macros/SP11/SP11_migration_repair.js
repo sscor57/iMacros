@@ -5,6 +5,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
+	
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
@@ -13,6 +14,7 @@ var addIIMSpaces = function(anyStringWithSpaces) {
     }
 }
 
+// makes sure that edit mode is set to 'On'
 var editModeON = function() {
     var macroCode = "";
     var e = 0;
@@ -45,6 +47,7 @@ var editModeON = function() {
     }
 }
 
+// uses the title div (so it's actually using Course Name to extrapolate the bb9 course id)
 var getBB9_courseID = function() {
     var macroCode = "";
     var e = 0;
@@ -66,7 +69,7 @@ var getBB9_courseID = function() {
 // clicks on a left nav buttons title text.
 var lnavButtonClick = function(button) {
     var macroCode = "";
-    e = 0;
+    var e = 0;
     var iimButton = "";
 
 	try {
@@ -80,12 +83,8 @@ var lnavButtonClick = function(button) {
     }
 }
 
+// contains all the operations and the order in which they should be performed
 var templateSetup = function() {
-	var macroCode = "";
-	var e = 0;
-	var contentAreas = [];
-	var i = 0;
-	var artifactLinks = [];
 
     // captures data from Celeste. 
     var celesteDataCapture = function(courseID) {
@@ -224,6 +223,7 @@ var templateSetup = function() {
         }
     }
     
+    // uses the "Discover Content" feature to capture xids for content collection items
     var xIDs = function() {
         var macroCode = "";
         var e = 0;
@@ -310,28 +310,87 @@ var templateSetup = function() {
             alert(err + "\n: xIDs is having problems.");
         }
     }
-	
-	var createArtifact = function(searchPattern, artifactRows) {
-		var j = 0;
-		var xID = "";
-		var title = "";
-		var artifact = "";
-	
+    
+    // moves the version folder to it's place in /institution/
+    var moveCC = function(bb9_courseID) {
+        var macroCode = "";
+        var e = 0;
+        var extract = "";
+        var ccTRs = [];
+        var i = 0;
+        var versionFolder = "";
+        var errorMessage = "";
+    
         try {
-            for (j = 0; j < artifactRows.length; j++) {
-                if (artifactRows[j].search(searchPattern) != -1) {
-                    xID = artifactRows[j].match(/id=\"(\d+)_1_xythosFileSize\"/)[1];
-                    title = artifactRows[j].match(searchPattern);
-                	artifact = "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@/bbcswebdav/xid-" + xID + "_1\" target=\"_blank\" alt=\"\">" + title + "</a>";
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.course.files_groupExpanderLink\n";
+            e = iimPlay("CODE:" + macroCode);
+            if (e != 1) {
+                iimPlay("CODE:" + macroCode);
+            }
+            
+            macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=3 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
+            e = iimPlay("CODE:" + macroCode);
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:listContainer_datatable EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            versionFolder = extract.match(/Version\d{4}/);
+            ccTRs = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            for (i = 0; i < ccTRs.length; i++) {
+                if (ccTRs[i].search(/Version\d{4}</) != -1) {
+                    macroCode = "SET !TIMEOUT_STEP 1\n";
+                    macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:filesForm ATTR=ID:listContainer_file*/courses/" + bb9_courseID + "/" + versionFolder + " CONTENT=YES\n";
+                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_link_*_top&&TXT:Move\n";
+                    e = iimPlay("CODE:" + macroCode);
+                    if (e != 1) {
+                        errorMessage = "There is a version folder with that name in that location already.\n\n";
+                        errorMessage += "This script can continue to advance, but you will need to fix the paths in all \n";
+                        errorMessage += "links to course files and scoring guides after you rename the folder and move it\n";
+                        errorMessage += "to it's course folder (/institution/";
+                        errorMessage += bb9_courseID.match(/_(\w+?)\d+?(?:\w+?-\w+?)*_/)[1] + "/" + bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1] + ").";
+                        throw errorMessage;
+                    }
+                    
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:destination ATTR=ID:targetPath_CSFile CONTENT=/institution/" + bb9_courseID.match(/_(\w+?)\d+?(?:\w+?-\w+?)*_/)[1] + "/" + bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1] + "/\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:destination ATTR=NAME:bottom_Submit&&VALUE:Submit\n";
+                    e = iimPlay("CODE:" + macroCode);
                 }
             }
-            return artifact
+            return
         } catch(err) {
-		    alert(err + "\nSomething went wrong with createArtifact");
-		}
-	}
+            alert("moveCC is having problems.\n" + err);
+        }
+    }
 	
+	// captures xids and creates artifact links for institution wide artifacts
 	var captureArtifactLinks = function() {
+	
+        var createArtifact = function(searchPattern, artifactRows) {
+            var j = 0;
+            var xID = "";
+            var title = "";
+            var artifact = "";
+    
+            try {
+                for (j = 0; j < artifactRows.length; j++) {
+                    if (artifactRows[j].search(searchPattern) != -1) {
+                        xID = artifactRows[j].match(/id=\"(\d+)_1_xythosFileSize\"/)[1];
+                        title = artifactRows[j].match(searchPattern);
+                        artifact = "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@/bbcswebdav/xid-" + xID + "_1\" target=\"_blank\" alt=\"\">" + title + "</a>";
+                    }
+                }
+                return artifact
+            } catch(err) {
+                alert(err + "\nSomething went wrong with createArtifact");
+            }
+        }
+
 		var macroCode = "";
 		var e = 0;
 		var artifactRows = [];
@@ -425,6 +484,7 @@ var templateSetup = function() {
 		}
 	}
 	
+	// extracts the left nav and return an array of button names
 	var extractLNav = function() {
 		var macroCode = "";
 		var e = 0;
@@ -455,6 +515,7 @@ var templateSetup = function() {
 		
 	}
 
+    // returns each <li> in the content area as an element of an array
     var captureContentAreas = function() {
         var macroCode = "";
         var e = 0;
@@ -480,6 +541,7 @@ var templateSetup = function() {
 		}
     }
     
+    // returns a artifact link. the search pattern should be a filename or an xid
     var getArtifact = function(searchPattern, artifactLinks) {
         var artifact = "";
         
@@ -495,6 +557,7 @@ var templateSetup = function() {
         }
     }
     
+    // sets the current print item in the content area to the local instances xid
     var fixPrint = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -529,6 +592,7 @@ var templateSetup = function() {
 		}
     }
     
+    // set the current accordion toolbar
     var fixAccordion = function() {
         var macroCode = "";
         var e = 0;
@@ -570,6 +634,7 @@ var templateSetup = function() {
 		}
     }
     
+    // sets the polices and procedures item in Getting Started to that of the local instance
     var fixPoliciesProcedures = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -611,6 +676,7 @@ var templateSetup = function() {
         }
     }
     
+    // sets the Review Course Content item in Getting Started to that of the local instance
     var fixReviewCourseContent = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -652,6 +718,7 @@ var templateSetup = function() {
         }
     }
     
+    // set the Welcome and Introductions disc. item to that of the local instance
     var fixWelcomeIntroductions = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -693,6 +760,7 @@ var templateSetup = function() {
         }
     }
     
+    // set the Faculty Expectations disc. item to that of the local instance
     var fixFacultyExpectations = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -734,6 +802,7 @@ var templateSetup = function() {
         }
     }
     
+    // returns false if Updates and Handouts are missing or there's too many
     var updatesHandoutsCheck = function() {
         var macroCode = "";
         var e = "";
@@ -741,7 +810,6 @@ var templateSetup = function() {
         var contentAreas = [];
         
         try {
-            
             lnavButtonClick("Discussions");
             
             macroCode = "SET !TIMEOUT_STEP 1\n";
@@ -763,16 +831,56 @@ var templateSetup = function() {
         }
     }
     
-    var rebuildUpdatesHandouts = function(discussionInfo) {
+    // deletes all forums from the discussion area that have Updates and Handouts in the title
+    var deleteUpdatesHandouts = function(artifactLinks) {
         var macroCode = "";
-        var e = 1;
-        var i = 0;
-        var contentType = 0;
-        var xID = "";
-        var fileName = "";
-        var linkTitle = "";
+        var e = 0;
+        var extract = "";
         var artifact = "";
-        var discussionTopics = [];
+        var contentLIs = [];
+        var contextualMenuIdNumber = "";
+    
+        try {
+            lnavButtonClick("Discussions");
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";    
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
+            macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:conferenceForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
+            e = iimPlay("CODE:" + macroCode);
+            
+            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            contentLIs = extract.match(/<tr[\s\S]+?<\/tr>/g);
+            artifact = getArtifact(/updates_handouts\.html/i, artifactLinks);
+            
+            for (j = 0; j < contentLIs.length; j++) {
+                if (contentLIs[j].search(/Updates and Handouts/) != -1) {
+                    checkbox = contentLIs[j].match(/listContainer_formCBs_\d+?_1/)[0];
+            
+                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:conferenceForm ATTR=ID:" + checkbox + " CONTENT=YES\n";
+                    e = iimPlay("CODE:" + macroCode);
+                }
+            }
+            
+            if (extract.search(/Updates and Handouts/) != -1) {
+                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+                macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_link_removeListAction_bottom\n";
+                e = iimPlay("CODE:" + macroCode);
+            }
+            return
+        } catch(err) {
+            alert(err + ": deleteUpdatesHandouts is having problems.");
+        }
+    }
+    
+    // if the forum is missing, it builds it into a unit. if it already exists it adds it
+    var rebuildUpdatesHandouts = function(discussionInfo) {
 
         var toggleCreateNewForum = function() {
             var macroCode = "";
@@ -996,6 +1104,16 @@ var templateSetup = function() {
                 alert(err + ": UHReorder is having problems.");
             }
         }
+        
+        var macroCode = "";
+        var e = 1;
+        var i = 0;
+        var contentType = 0;
+        var xID = "";
+        var fileName = "";
+        var linkTitle = "";
+        var artifact = "";
+        var discussionTopics = [];
 
         try {
             contentType = discussionInfo[0];
@@ -1029,53 +1147,7 @@ var templateSetup = function() {
         }
     }
     
-    var deleteUpdatesHandouts = function(artifactLinks) {
-        var macroCode = "";
-        var e = 0;
-        var extract = "";
-        var artifact = "";
-        var contentLIs = [];
-        var contextualMenuIdNumber = "";
-    
-        try {
-            lnavButtonClick("Discussions");
-            
-            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";    
-            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_openpaging\n";
-            macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:conferenceForm ATTR=ID:listContainer_numResults CONTENT=1000\n";
-            macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_gopaging\n";
-            e = iimPlay("CODE:" + macroCode);
-            
-            macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-            macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-            
-            contentLIs = extract.match(/<tr[\s\S]+?<\/tr>/g);
-            artifact = getArtifact(/updates_handouts\.html/i, artifactLinks);
-            
-            for (j = 0; j < contentLIs.length; j++) {
-                if (contentLIs[j].search(/Updates and Handouts/) != -1) {
-                    checkbox = contentLIs[j].match(/listContainer_formCBs_\d+?_1/)[0];
-            
-                    macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-                    macroCode += "TAG POS=1 TYPE=INPUT:CHECKBOX FORM=NAME:conferenceForm ATTR=ID:" + checkbox + " CONTENT=YES\n";
-                    e = iimPlay("CODE:" + macroCode);
-                }
-            }
-            
-            if (extract.search(/Updates and Handouts/) != -1) {
-                macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-                macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
-                macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_link_removeListAction_bottom\n";
-                e = iimPlay("CODE:" + macroCode);
-            }
-            return
-        } catch(err) {
-            alert(err + ": deleteUpdatesHandouts is having problems.");
-        }
-    }
-    
+    // set the Updates and Handouts item (in the content area) to that of the local instance
     var fixUpdatesHandouts = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -1117,6 +1189,7 @@ var templateSetup = function() {
         }
     }
     
+    // set the Ask Your Instructor item to that of the local instance
     var fixAskYourInstructor = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -1158,6 +1231,7 @@ var templateSetup = function() {
         }
     }
     
+    // set the Supllemental Instruction item to that of the local instance
     var fixSupplementalInstruction = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -1199,6 +1273,7 @@ var templateSetup = function() {
         }
     }
     
+    // fixes the Getting Started First Course Support item to that of the local instance
     var fixFCSGettingStarted = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -1240,6 +1315,7 @@ var templateSetup = function() {
         }
     }
     
+    // fixes the First Course Support item in all the units except the final one
     var fixFCS = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -1281,6 +1357,7 @@ var templateSetup = function() {
         }
     }
     
+    // fixes the First Course Support in the final unit
     var fixFCSFinalUnit = function(artifactLinks) {
         var macroCode = "";
         var e = 0;
@@ -1322,6 +1399,7 @@ var templateSetup = function() {
         }
     }
     
+    // enrolls a specified userName in the current template
     var enrollInCourseID = function(userName, bb9_courseID, role) {
         var macroCode = "";
         var e = "";
@@ -1370,9 +1448,29 @@ var templateSetup = function() {
             alert(err + " enrollInCourseID is having problems.");
         }
     }
-
+    
+    // returns false if there are no TII assignments built yet
+    var tiiCheck = function(celesteData) {
+        var macroCode = "";
+        var e = "";
+        var extract = "";
+        var contentAreas = [];
+        var tiiData = celesteData[3];
+        
+        try {        
+            lnavButtonClick("Turnitin");
+            if (captureContentAreas().length === null) {
+                return false
+            } else if (captureContentAreas().length != tiiData.length) {
+                return true
+            }
+        } catch(err) {
+            alert(err + "\n: tiiCheck is having problems.");
+        }
+    }
+    
+    // adds 2 draft TII assignments and 1 additional assignment for each assignment in Celeste and hides all the gradebook columns that generates
     var addTII = function(celesteData, bb9_courseID) {
-        var x = 0;
     
         var createTIIAssignments = function(celesteData, bb9_courseID) {
             var i = 0;
@@ -1612,31 +1710,17 @@ var templateSetup = function() {
         try {
             createTIIAssignments(celesteData, bb9_courseID);
             hideTIIColumns(celesteData)
-            x++;
+            return
         } catch(err) {
             alert(err + ": addTII is having problems.");
         }
     }
     
-    var tiiCheck = function(celesteData) {
-        var macroCode = "";
-        var e = "";
-        var extract = "";
-        var contentAreas = [];
-        var tiiData = celesteData[3];
-        
-        try {        
-            lnavButtonClick("Turnitin");
-            if (captureContentAreas().length === null) {
-                return false
-            } else if (captureContentAreas().length != tiiData.length) {
-                return true
-            }
-        } catch(err) {
-            alert(err + "\n: tiiCheck is having problems.");
-        }
-    }
-    
+	var macroCode = "";
+	var e = 0;
+	var contentAreas = [];
+	var i = 0;
+	var artifactLinks = [];
     var bb9_courseID = "";
     var unitNum = "";
     var discussionInfo = [];
@@ -1650,7 +1734,6 @@ var templateSetup = function() {
     	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1]));
         contentAreas = extractLNav();
         artifactLinks = captureArtifactLinks();
-        
         if (updatesHandoutsCheck()) {
             deleteUpdatesHandouts(artifactLinks);
         }
@@ -1683,6 +1766,7 @@ var templateSetup = function() {
     	if (tiiCheck(celesteData)) {
             addTII(celesteData, bb9_courseID);
         }
+        moveCC(bb9_courseID);
         return
     } catch(err) {
         alert(err + "\nSomething went wrong with templateSetup");
