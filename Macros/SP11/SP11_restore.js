@@ -554,7 +554,7 @@ var addQuiz = function(unitNum, quizInfo) {
         message = "Pausing for CP intervention. Import or build " + activityCode + ".\n";
         message += "\nFor your clipboard:\n\n";
         message += title + "\n";
-        message += artifact;
+        message += "<div class=\"capellaDrawer\">" + artifact + "</div>";
         alert(message);
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
         macroCode += "PAUSE\n";
