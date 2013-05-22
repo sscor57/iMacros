@@ -997,7 +997,7 @@ var celesteDataCapture = function(courseID) {
                 linkID = assignedRows[i].match(/assToMeContentLink-\d+/);
             
                 macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
-                macroCode += "WAIT SECONDS=3\n";
+                macroCode += "WAIT SECONDS=12\n";
                 macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
                 macroCode += "WAIT SECONDS=3\n";
                 macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
@@ -1039,7 +1039,7 @@ var celesteDataCapture = function(courseID) {
                 macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
                 macroCode += "WAIT SECONDS=2\n";
                 macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
-                macroCode += "WAIT SECONDS=2\n";
+                macroCode += "WAIT SECONDS=10\n";
                 macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
                 macroCode += "WAIT SECONDS=2\n";
                 macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
