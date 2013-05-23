@@ -60,6 +60,10 @@ var getBB9_courseID = function() {
         extract = iimGetLastExtract();
         
         bb9_courseID = extract.match(/TEMPLATE_\w+?\d+?(?:\w+?-\w+?)*_\d+/)[0];
+        if (bb9_courseID.search(/_INPROGRESS/) != -1) {
+        	bb9_courseID = bb9_courseID.replace(/_INPROGRESS/, "");
+        }
+        
         return bb9_courseID
     } catch(err) {
         alert(err + ": getBB9_courseID is having problems.");
@@ -1722,6 +1726,7 @@ var templateSetup = function() {
 	var i = 0;
 	var artifactLinks = [];
     var bb9_courseID = "";
+    var userName = null;
     var unitNum = "";
     var discussionInfo = [];
     var contentInfo = [];
@@ -1729,7 +1734,7 @@ var templateSetup = function() {
     try {
     	editModeON();
     	bb9_courseID = addIIMSpaces(getBB9_courseID());
-    	enrollInCourseID(prompt("Enter your user ID:", "CP_cswope"), bb9_courseID, "C");
+    	enrollInCourseID(prompt("Enter your user ID:", userName), bb9_courseID, "C");
     	contentInfo = xIDs();
     	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/_(\w+?\d+?(?:\w+?-\w+?)*)_/)[1]));
         contentAreas = extractLNav();
