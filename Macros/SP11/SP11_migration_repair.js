@@ -133,7 +133,7 @@ var templateSetup = function() {
                     macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
                     macroCode += "WAIT SECONDS=2\n";
                     macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-                    macroCode += "WAIT SECONDS=2\n";
+                    macroCode += "WAIT SECONDS=10\n";
                     macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
                     e = iimPlay("CODE:" + macroCode);
                 }
@@ -205,9 +205,9 @@ var templateSetup = function() {
                 assignmentTitle = assignmentRows[i].match(/u\d{2}a\d{1,2}: *[\s\S]+?(?=<\/a>)/)[0];
                 
                 if (assignmentRows[i].search(/draft/i) > -1) {
-                    assType = "draft";
+                    assType = 1;
                 } else {
-                    assType = "final";
+                    assType = 0;
                 }
                 assignment = [assignmentTitle, assType];
                 assignments.push(assignment);
