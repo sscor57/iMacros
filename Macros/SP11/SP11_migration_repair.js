@@ -5,7 +5,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-	
+    
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
@@ -90,142 +90,142 @@ var lnavButtonClick = function(button) {
 // contains all the operations and the order in which they should be performed
 var templateSetup = function() {
 
-    // captures data from Celeste. 
-    var celesteDataCapture = function(courseID) {
-        var macroCode = "";
-        var e = "";
-        var extract = "";
-        var assignedRows = [];
-        var i = 0;
-        var linkID = "";
-        var unitTitles = [];
-        var projectTitles = [];
-        var celesteData = [];
-        var subMenu = "";
-        var components = [];
-        var projectComponents = [];
-        var unitNum = "";
-        var assignmentRows = [];
-        var assignment = [];
-        var assignments = [];
-        var assignmentTitle = "";
-        var assNum = "";
-        var assType = "";
-    
-        try {
-            macroCode = "TAB OPEN\n";
-            macroCode += "TAB T=2\n";
-            macroCode += "URL GOTO=https://celeste.capella.edu\n";
-            macroCode += "PAUSE\n";
-            e = iimPlay("CODE:" + macroCode);
-        
-            macroCode = "TAG POS=1 TYPE=A ATTR=ID:assToMe_Nav\n";
-            macroCode += "WAIT SECONDS=2\n";
-            macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dialogHolder EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-            
-            assignedRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
-            for (i = 0; i < assignedRows.length; i++) {
-                if (assignedRows[i].search(courseID) != -1) {
-                    linkID = assignedRows[i].match(/assToMeContentLink-\d+/);
-                
-                    macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
-                    macroCode += "WAIT SECONDS=2\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-                    macroCode += "WAIT SECONDS=10\n";
-                    macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
-                    e = iimPlay("CODE:" + macroCode);
-                }
-            }
-        
-            macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:courseUnitSummary EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-        
-            unitTitles = extract.match(/<h3>[\s\S]+?(?=<\/h3>)/g);
-        
-            for (i = 0; i < unitTitles.length; i++) {
-                unitTitles[i] = unitTitles[i].replace(/<h3>/, "");
-                unitNum = unitTitles[i].match(/Unit \d{1,2}/);
-                unitTitles[i] = unitTitles[i].replace(/Unit \d{1,2} -/, unitNum);
-            }
-        
-            celesteData.push(unitTitles);
-        
-            macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:childMenuContent EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-            subMenu = extract.match(/<a href="#" onclick="">\s*Syllabus<\/a>\s*?(<ul>[\s\S]+?<\/ul>)/)[1];
-            projectTitles = subMenu.match(/Project: [\s\S]+?(?=<\/a>)/g);
-        
-            if (projectTitles != null) {
-                for (i = 0; i < projectTitles.length; i++) {
-                    projectTitles[i] = projectTitles[i].replace(/Project: /, "");
-                }
-        
-                celesteData.push(projectTitles);
-        
-                for (i = 0; i < projectTitles.length; i++) {
-                    components = [];
-                    macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-                    macroCode += "WAIT SECONDS=1\n";
-                    macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
-                    macroCode += "WAIT SECONDS=1\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
-                    macroCode += "WAIT SECONDS=1\n";
-                    macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
-                    macroCode += "WAIT SECONDS=1\n";
-                    macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
-                    e = iimPlay("CODE:" + macroCode);
-                    extract = iimGetLastExtract();
-                    components = extract.match(/u\d{2}[ad]\d{1,2}/g);
-                    projectComponents.push(components);
-                }
-                celesteData.push(projectComponents);
-            } else {
-                celesteData.push(projectTitles);
-                celesteData.push(projectComponents);
-            }
-        
-            assignments.push(["1 - Draft", "draft"])
-            assignments.push(["2 - Draft", "draft"])
-        
-            macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-            macroCode += "WAIT SECONDS=2\n";
-            macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Activities\n";
-            macroCode += "WAIT SECONDS=2\n";
-            macroCode += "TAG POS=1 TYPE=UL ATTR=ID:assignmentsList EXTRACT=HTM\n";
-            e = iimPlay("CODE:" + macroCode);
-            extract = iimGetLastExtract();
-        
-            assignmentRows = extract.match(/<li[\s\S]+?<\/li>/g);
-        
-            for (i = 0; i < assignmentRows.length; i++) {
-                assignmentTitle = assignmentRows[i].match(/u\d{2}a\d{1,2}: *[\s\S]+?(?=<\/a>)/)[0];
-                
-                if (assignmentRows[i].search(/draft/i) > -1) {
-                    assType = 1;
-                } else {
-                    assType = 0;
-                }
-                assignment = [assignmentTitle, assType];
-                assignments.push(assignment);
-            }
-        
-            celesteData.push(assignments);
-        
-            macroCode = "TAB CLOSE\n";
-            e = iimPlay("CODE:" + macroCode);
-            if (e != 1) {
-                throw e;
-            }
-        
-            return celesteData
-        } catch(err) {
-            alert(err + " celesteDataCapture is having problems.");
-        }
-    }
+	// captures data from Celeste. 
+	var celesteDataCapture = function(courseID) {
+		var macroCode = "";
+		var e = "";
+		var extract = "";
+		var assignedRows = [];
+		var i = 0;
+		var linkID = "";
+		var unitTitles = [];
+		var projectTitles = [];
+		var celesteData = [];
+		var subMenu = "";
+		var components = [];
+		var projectComponents = [];
+		var unitNum = "";
+		var assignmentRows = [];
+		var assignment = [];
+		var assignments = [];
+		var assignmentTitle = "";
+		var assNum = "";
+		var assType = "";
+
+		try {
+			macroCode = "TAB OPEN\n";
+			macroCode += "TAB T=2\n";
+			macroCode += "URL GOTO=https://celeste.capella.edu\n";
+			macroCode += "PAUSE\n";
+			e = iimPlay("CODE:" + macroCode);
+	
+			macroCode = "TAG POS=1 TYPE=A ATTR=ID:assToMe_Nav\n";
+			macroCode += "WAIT SECONDS=3\n";
+			macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:dialogHolder EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+		
+			assignedRows = extract.match(/<tr[\s\S]+?<\/tr>/g);
+			for (i = 0; i < assignedRows.length; i++) {
+				if (assignedRows[i].search(courseID) != -1) {
+					linkID = assignedRows[i].match(/assToMeContentLink-\d+/);
+			
+					macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
+					macroCode += "WAIT SECONDS=12\n";
+					macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
+					macroCode += "WAIT SECONDS=3\n";
+					macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
+					e = iimPlay("CODE:" + macroCode);
+				}
+			}
+	
+			macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:courseUnitSummary EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+	
+			unitTitles = extract.match(/<h3>[\s\S]+?(?=<\/h3>)/g);
+	
+			for (i = 0; i < unitTitles.length; i++) {
+				unitTitles[i] = unitTitles[i].replace(/<h3>/, "");
+				unitNum = unitTitles[i].match(/Unit \d{1,2}/);
+				unitTitles[i] = unitTitles[i].replace(/Unit \d{1,2} -/, unitNum);
+			}
+	
+			celesteData.push(unitTitles);
+	
+			macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:childMenuContent EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+			subMenu = extract.match(/<a href="#" onclick="">\s*Syllabus<\/a>\s*?(<ul>[\s\S]+?<\/ul>)/)[1];
+			projectTitles = subMenu.match(/Project: [\s\S]+?(?=<\/a>)/g);
+	
+			if (projectTitles != null) {
+				for (i = 0; i < projectTitles.length; i++) {
+					projectTitles[i] = projectTitles[i].replace(/Project: /, "");
+				}
+	
+				celesteData.push(projectTitles);
+	
+				for (i = 0; i < projectTitles.length; i++) {
+					components = [];
+					macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
+					macroCode += "WAIT SECONDS=2\n";
+					macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
+					macroCode += "WAIT SECONDS=2\n";
+					macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
+					macroCode += "WAIT SECONDS=10\n";
+					macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
+					macroCode += "WAIT SECONDS=2\n";
+					macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
+					e = iimPlay("CODE:" + macroCode);
+					extract = iimGetLastExtract();
+					components = extract.match(/u\d{2}[ad]\d{1,2}/g);
+					projectComponents.push(components);
+				}
+				celesteData.push(projectComponents);
+			} else {
+				celesteData.push(projectTitles);
+				celesteData.push(projectComponents);
+			}
+	
+			assignments.push(["1 - Draft", "draft"])
+			assignments.push(["2 - Draft", "draft"])
+	
+			macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
+			macroCode += "WAIT SECONDS=3\n";
+			macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Activities\n";
+			macroCode += "WAIT SECONDS=3\n";
+			macroCode += "TAG POS=1 TYPE=UL ATTR=ID:assignmentsList EXTRACT=HTM\n";
+			e = iimPlay("CODE:" + macroCode);
+			extract = iimGetLastExtract();
+	
+			assignmentRows = extract.match(/<li[\s\S]+?<\/li>/g);
+	
+			for (i = 0; i < assignmentRows.length; i++) {
+				assignmentTitle = assignmentRows[i].match(/u\d{2}a\d{1,2}: *[\s\S]+?(?=<\/a>)/)[0];
+			
+				if (assignmentRows[i].search(/draft/i) > -1) {
+					assType = "draft";
+				} else {
+					assType = "final";
+				}
+				assignment = [assignmentTitle, assType];
+				assignments.push(assignment);
+			}
+	
+			celesteData.push(assignments);
+	
+			macroCode = "TAB CLOSE\n";
+			e = iimPlay("CODE:" + macroCode);
+			if (e != 1) {
+				throw e;
+			}
+	
+			return celesteData
+		} catch(err) {
+			alert(err + ":\n celesteDataCapture is having problems.");
+		}
+	}
     
     // uses the "Discover Content" feature to capture xids for content collection items
     var xIDs = function() {
@@ -330,11 +330,13 @@ var templateSetup = function() {
             macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.course.files_groupExpanderLink\n";
             e = iimPlay("CODE:" + macroCode);
             if (e != 1) {
-                iimPlay("CODE:" + macroCode);
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:controlpanel.course.files_groupExpanderLink\n";
+				e = iimPlay("CODE:" + macroCode);
             }
             
             macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
-            macroCode += "TAG POS=3 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
+            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
             e = iimPlay("CODE:" + macroCode);
             
             macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
@@ -1444,6 +1446,9 @@ var templateSetup = function() {
                 e = iimPlay("CODE:" + macroCode);	
                 return true
             } else if (extract.search(userName) != -1) {
+                macroCode = "TAB T=1\nFRAME F=2\n";
+                macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
+                e = iimPlay("CODE:" + macroCode);	
                 return true
             } else {
                 return false
@@ -1720,6 +1725,93 @@ var templateSetup = function() {
         }
     }
     
+    // extracts a table or ul (specified by 'elementType' and 'elementID'), assigns each TR or LI to an element of an array and loops through it until if finds searchPattern. when it does, it captures the ID and returns it.
+    var captureCMID = function(searchPattern, elementType, elementID) {
+		var macroCode = "";
+		var e = "";
+		var extract = "";
+		var TR_or_LI_regex = new RegExp;
+		var rows_or_lis = [];
+		var i = 0;
+		var contextualMenuIdNumber = "";
+		
+    	try {
+    		if (elementType === "TABLE") {
+    			TR_or_LI_regex = /<tr[\s\S]+?<\/tr>/g;
+    		} else if (elementType === "UL") {
+    			TR_or_LI_regex = /<li[\s\S]+?<\/li>/g;
+    		} else {
+    			throw "elementType is neither TABLE or UL. I don't know what to do!";
+    		}
+    	
+    		macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+            macroCode += "TAG POS=1 TYPE=" + elementType + " ATTR=ID:" + elementID + " EXTRACT=HTM\n";
+            e = iimPlay("CODE:" + macroCode);
+            extract = iimGetLastExtract();
+            
+            rows_or_lis = extract.match(TR_or_LI_regex);
+            
+            for (i = 0; i < rows_or_lis.length; i++) {
+            	if (rows_or_lis[i].search(searchPattern) != -1) {
+            		contextualMenuIdNumber = rows_or_lis[i].match(/cmlink_(\w{32})/)[1];
+            	}
+            }
+            
+            return contextualMenuIdNumber
+    	} catch(err) {
+            alert(err + ":\n captureCMID is having problems.");
+        }
+    }
+    
+    // goes to the discussion area in the lnav and fixes the artifact links for all the discussion topics which break on migration.
+    var fixDiscussionTopics = function() {
+    
+		var fixTopic = function(artifactFileNameRegExp, artifactLinks) {
+			var macroCode = "";
+			var e = "";
+			var extract = "";
+			var contextualMenuIdNumber = "";
+			var artifact = "";
+		
+			try {
+				contextualMenuIdNumber = captureCMID(artifactFileNameRegExp, "TABLE", "listContainer_datatable");
+				artifact = getArtifact(artifactFileNameRegExp, artifactLinks);
+		
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+				macroCode += "TAG POS=1 TYPE=A ATTR=ID:editItem_" + contextualMenuIdNumber + "\n";
+				macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
+				macroCode += "TAB T=2\n";
+				macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
+				e = iimPlay("CODE:" + macroCode);
+		
+				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:top_Submit&&VALUE:Submit\n";
+				e = iimPlay("CODE:" + macroCode);
+			
+				return
+			} catch(err) {
+				alert(err + ":\n fixTopic is having problems.");
+			}
+		}
+		
+    	try {
+    		lnavButtonClick("Discussions");
+    		
+    		fixTopic(/welcome_and_introductions\.html/, artifactLinks);    		
+    		fixTopic(/faculty_expectations\.html/, artifactLinks);    		
+    		fixTopic(/ask_your_instructor\.html/, artifactLinks);  		
+    		fixTopic(/updates_handouts\.html/, artifactLinks);  		
+    		fixTopic(/supplemental_instruction\.html/, artifactLinks); 		
+    		fixTopic(/cyber_cafe\.html/, artifactLinks);
+            
+    		return
+        } catch(err) {
+            alert(err + ":\n fixTopic is having problems.");
+        }
+    }
+    
 	var macroCode = "";
 	var e = 0;
 	var contentAreas = [];
@@ -1742,6 +1834,7 @@ var templateSetup = function() {
         if (updatesHandoutsCheck()) {
             deleteUpdatesHandouts(artifactLinks);
         }
+    	fixDiscussionTopics();
         
         for (i = 0; i < contentAreas.length; i++) {
             lnavButtonClick(contentAreas[i]);
@@ -1767,7 +1860,6 @@ var templateSetup = function() {
                 fixSupplementalInstruction(artifactLinks);
             }
         }
-        
     	if (tiiCheck(celesteData)) {
             addTII(celesteData, bb9_courseID);
         }
