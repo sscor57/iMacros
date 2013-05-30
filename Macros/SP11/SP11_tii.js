@@ -5,7 +5,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-	
+    
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
@@ -47,7 +47,7 @@ var editModeON = function() {
     }
 }
 
-// uses the title div (so it's actually using Course Name to extrapolate the bb9 course id)
+// uses the courses content collection link in the lnav
 var getBB9_courseID = function() {
     var macroCode = "";
     var e = 0;
@@ -55,11 +55,12 @@ var getBB9_courseID = function() {
     
     try {
         macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
-        macroCode += "TAG POS=1 TYPE=LI ATTR=ID:controlpanel.course.files EXTRACT=HTM\n";
+        macroCode += "TAG POS=1 TYPE=DIV ATTR=ID:courseMenuPalette_paletteTitleHeading EXTRACT=TXT\n";
         e = iimPlay("CODE:" + macroCode);
         extract = iimGetLastExtract();
         
-        bb9_courseID = extract.match(/\w+?\d+?_\d+?_\d+?_\d+?_.+?_[\d\w]+/)[0];
+        bb9_courseID = extract.match(/TEMPLATE_\w+?\d+?(?:\w+?-\w+?)*_\d+/)[0];
+        
         return bb9_courseID
     } catch(err) {
         alert(err + ": getBB9_courseID is having problems.");
