@@ -5,7 +5,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-    
+	
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
@@ -217,10 +217,6 @@ var templateSetup = function() {
             if (e != 1) {
                 throw e;
             }
-    
-            macroCode = "TAB T=1\nFRAME F=2\n";
-            macroCode += "TAG POS=1 TYPE=A ATTR=TXT:" + bb9_courseID + "\n";
-            e = iimPlay("CODE:" + macroCode);
         
             return celesteData
         } catch(err) {
@@ -1493,6 +1489,12 @@ var templateSetup = function() {
                 var tiiframe = 0;
         
                 try {
+                	if (tiiType === "final") {
+                		tiiType = 0;
+                	} else {
+                		tiiType = 1;
+                	}
+                	
                     lnavButtonClick("Turnitin");
             
                     macroCode = "SET !TIMEOUT_STEP 1\n";
@@ -1504,7 +1506,7 @@ var templateSetup = function() {
                     if (extract.search(tiiTitle) === -1) {
                         macroCode = "SET !TIMEOUT_STEP 1\n";
                         macroCode += "TAB T=1\nFRAME F=2\n";
-                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Assessments\n";
+                        macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Create<SP>Assessment\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Turnitin<SP>Assignment\n";
                         e = iimPlay("CODE:" + macroCode);
                 
@@ -1733,10 +1735,10 @@ var templateSetup = function() {
     
     try {
     	editModeON();
-    	bb9_courseID = addIIMSpaces(getBB9_courseID());
+    	bb9_courseID = getBB9_courseID();
     	enrollInCourseID(prompt("Enter your user ID:", "cswope"), bb9_courseID, "C");
     	//contentInfo = xIDs();
-    	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/^(\w+?\d+?)(?=_)/)[1]));
+    	celesteData = celesteDataCapture(prompt("Enter the Capella Course ID:", bb9_courseID.match(/TEMPLATE_(\w+?\d+?)(?=_)/)[1]));
         contentAreas = extractLNav();
         //artifactLinks = captureArtifactLinks();
         /*if (updatesHandoutsCheck()) {
