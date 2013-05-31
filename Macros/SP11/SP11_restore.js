@@ -2,15 +2,6 @@
 Instructions: log into any SP11 instance of BB9, navigate to a course or template, launch the macro.
 */
 
-var progressMessage = "";
-var errorMessage = "";
-var bb9_courseID = null;
-var numberOfUnits = 0;
-var numberOfProjects = 0;
-var courseID = null;
-var userName = null;
-var celesteData = [];
-
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
@@ -42,7 +33,7 @@ var editModeON = function() {
     var extract = "";
     
     try{
-    	macroCode = "TAB T=1\nFRAME F=2\n";
+        macroCode = "TAB T=1\nFRAME F=2\n";
 		macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:statusText EXTRACT=HTM\n";
 		e = iimPlay("CODE:" + macroCode);
 		extract = iimGetLastExtract();
@@ -1886,6 +1877,12 @@ var addTII = function(celesteData, bb9_courseID) {
             var tiiframe = 0;
     
             try {
+				if (tiiType === "final") {
+					tiiType = 0;
+				} else {
+					tiiType = 1;
+				}
+				
                 lnavButtonClick("Turnitin");
         
                 macroCode = "SET !TIMEOUT_STEP 1\n";
@@ -2204,6 +2201,15 @@ var courseNameInProgress = function(bb9_courseID) {
         alert(err + ": courseNameInProgress is having problems.");
     }
 }
+
+var progressMessage = "";
+var errorMessage = "";
+var bb9_courseID = null;
+var numberOfUnits = 0;
+var numberOfProjects = 0;
+var courseID = null;
+var userName = null;
+var celesteData = [];
 
 courseID = templateInfo();
 goToCourseID(bb9_courseID, userName);
