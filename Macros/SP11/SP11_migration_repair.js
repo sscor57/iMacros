@@ -132,61 +132,13 @@ var templateSetup = function() {
 			
 					macroCode = "TAG POS=1 TYPE=A ATTR=ID:" + linkID + "\n";
 					macroCode += "WAIT SECONDS=12\n";
-					macroCode += "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-					macroCode += "WAIT SECONDS=3\n";
-					macroCode += "TAG POS=2 TYPE=A ATTR=TXT:Units\n";
 					e = iimPlay("CODE:" + macroCode);
 				}
-			}
-	
-			macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:courseUnitSummary EXTRACT=HTM\n";
-			e = iimPlay("CODE:" + macroCode);
-			extract = iimGetLastExtract();
-	
-			unitTitles = extract.match(/<h3>[\s\S]+?(?=<\/h3>)/g);
-	
-			for (i = 0; i < unitTitles.length; i++) {
-				unitTitles[i] = unitTitles[i].replace(/<h3>/, "");
-				unitNum = unitTitles[i].match(/Unit \d{1,2}/);
-				unitTitles[i] = unitTitles[i].replace(/Unit \d{1,2} -/, unitNum);
 			}
 	
 			celesteData.push(unitTitles);
-	
-			macroCode = "TAG POS=1 TYPE=DIV ATTR=ID:childMenuContent EXTRACT=HTM\n";
-			e = iimPlay("CODE:" + macroCode);
-			extract = iimGetLastExtract();
-			subMenu = extract.match(/<a href="#" onclick="">\s*Syllabus<\/a>\s*?(<ul>[\s\S]+?<\/ul>)/)[1];
-			projectTitles = subMenu.match(/Project: [\s\S]+?(?=<\/a>)/g);
-	
-			if (projectTitles != null) {
-				for (i = 0; i < projectTitles.length; i++) {
-					projectTitles[i] = projectTitles[i].replace(/Project: /, "");
-				}
-	
-				celesteData.push(projectTitles);
-	
-				for (i = 0; i < projectTitles.length; i++) {
-					components = [];
-					macroCode = "TAG POS=1 TYPE=A ATTR=ID:childMenu\n";
-					macroCode += "WAIT SECONDS=2\n";
-					macroCode += "TAG POS=1 TYPE=SPAN ATTR=TXT:Syllabus\n";
-					macroCode += "WAIT SECONDS=2\n";
-					macroCode += "TAG POS=1 TYPE=A ATTR=TXT:Project:<SP>" + addIIMSpaces(projectTitles[i]) + "\n";
-					macroCode += "WAIT SECONDS=10\n";
-					macroCode += "TAG POS=1 TYPE=H3 ATTR=TXT:Project<SP>Components\n";
-					macroCode += "WAIT SECONDS=2\n";
-					macroCode += "TAG POS=1 TYPE=TABLE ATTR=ID:componentsList EXTRACT=HTM\n";
-					e = iimPlay("CODE:" + macroCode);
-					extract = iimGetLastExtract();
-					components = extract.match(/u\d{2}[ad]\d{1,2}/g);
-					projectComponents.push(components);
-				}
-				celesteData.push(projectComponents);
-			} else {
-				celesteData.push(projectTitles);
-				celesteData.push(projectComponents);
-			}
+			celesteData.push(projectTitles);
+			celesteData.push(projectComponents);
 	
 			assignments.push(["1 - Draft", "draft"])
 			assignments.push(["2 - Draft", "draft"])
@@ -388,7 +340,7 @@ var templateSetup = function() {
                     if (artifactRows[j].search(searchPattern) != -1) {
                         xID = artifactRows[j].match(/id=\"(\d+)_1_xythosFileSize\"/)[1];
                         title = artifactRows[j].match(searchPattern);
-                        artifact = "<a artifacttype=\"html\" href=\"http://@X@EmbeddedFile.requestUrlStub@X@/bbcswebdav/xid-" + xID + "_1\" target=\"_blank\" alt=\"\">" + title + "</a>";
+                        artifact = "<a artifacttype=\"html\" href=\"@X@EmbeddedFile.requestUrlStub@X@bbcswebdav/xid-" + xID + "_1\" target=\"_blank\" alt=\"\">" + title + "</a>";
                     }
                 }
                 return artifact
@@ -1497,6 +1449,12 @@ var templateSetup = function() {
                 var tiiframe = 0;
         
                 try {
+                	if (tiiType === "final") {
+                		tiiType = 0;
+                	} else {
+                		tiiType = 1;
+                	}
+                	
                     lnavButtonClick("Turnitin");
             
                     macroCode = "SET !TIMEOUT_STEP 1\n";
@@ -1776,8 +1734,9 @@ var templateSetup = function() {
 			try {
 				contextualMenuIdNumber = captureCMID(artifactFileNameRegExp, "TABLE", "listContainer_datatable");
 				artifact = getArtifact(artifactFileNameRegExp, artifactLinks);
-		
-				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				
+				macroCode = "SET !TIMEOUT_STEP 1\n";
+				macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
 				macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
 				macroCode += "TAG POS=1 TYPE=A ATTR=ID:editItem_" + contextualMenuIdNumber + "\n";
 				macroCode += "TAG POS=1 TYPE=SPAN ATTR=CLASS:mceIcon<SP>mce_code\n";
@@ -1785,8 +1744,9 @@ var templateSetup = function() {
 				macroCode += "TAG POS=1 TYPE=TEXTAREA FORM=NAME:source ATTR=ID:htmlSource CONTENT=" + addIIMSpaces("<div class=\"capellaDrawer\">" + artifact + "</div>") + "\n";
 				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:source ATTR=ID:insert\n";
 				e = iimPlay("CODE:" + macroCode);
-		
-				macroCode = "TAB T=1\nFRAME NAME=\"content\"\n";
+				
+				macroCode = "SET !TIMEOUT_STEP 1\n";
+				macroCode += "TAB T=1\nFRAME NAME=\"content\"\n";
 				macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:forumForm ATTR=NAME:top_Submit&&VALUE:Submit\n";
 				e = iimPlay("CODE:" + macroCode);
 			
@@ -1799,12 +1759,12 @@ var templateSetup = function() {
     	try {
     		lnavButtonClick("Discussions");
     		
-    		fixTopic(/welcome_and_introductions\.html/, artifactLinks);    		
-    		fixTopic(/faculty_expectations\.html/, artifactLinks);    		
-    		fixTopic(/ask_your_instructor\.html/, artifactLinks);  		
-    		fixTopic(/updates_handouts\.html/, artifactLinks);  		
-    		fixTopic(/supplemental_instruction\.html/, artifactLinks); 		
-    		fixTopic(/cyber_cafe\.html/, artifactLinks);
+    		fixTopic(/welcome_and_introductions\.html|Welcome and Introductions</, artifactLinks);    		
+    		fixTopic(/faculty_expectations\.html|Faculty Expectations</, artifactLinks);    		
+    		fixTopic(/ask_your_instructor\.html|Ask Your Instructor/, artifactLinks);  		
+    		fixTopic(/updates_handouts\.html|Updates and Handouts/, artifactLinks);  		
+    		fixTopic(/supplemental_instruction\.html|Supplemental Instruction/, artifactLinks); 		
+    		fixTopic(/cyber_cafe\.html|Cyber Cafe/, artifactLinks);
             
     		return
         } catch(err) {
@@ -1818,7 +1778,7 @@ var templateSetup = function() {
 	var i = 0;
 	var artifactLinks = [];
     var bb9_courseID = "";
-    var userName = null;
+    var userName = "cswope";
     var unitNum = "";
     var discussionInfo = [];
     var contentInfo = [];
