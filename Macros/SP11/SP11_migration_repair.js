@@ -5,7 +5,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-    
+	
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
