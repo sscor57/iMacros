@@ -116,6 +116,7 @@ var unenrollUserFromEverything = function(UID) {
         var contextualMenuIdNumber = "";
         var tbody = "";
         var rowsToScan = new Array;
+        var searchPattern = new RegExp;
         var i = 0;
 
         try {
@@ -127,32 +128,33 @@ var unenrollUserFromEverything = function(UID) {
             macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:courseManagerFormSearch ATTR=ID:courseInfoSearchText CONTENT=" + templateID + "\n";
             macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=NAME:courseManagerFormSearch ATTR=VALUE:Go\n";
             e = iimPlay("CODE:" + macroCode);
-        
-            contextualMenuIdNumber = captureCMID(templateID, "TBODY", "listContainer_databody");
+        	
+        	searchPattern = RegExp(">" + templateID + "<");
+            contextualMenuIdNumber = captureCMID(searchPattern, "TBODY", "listContainer_databody");
         
             macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=ID:admin_course_list_users\n";
             e = iimPlay("CODE:" + macroCode);
         
+			macroCode = "TAB T=1\nFRAME F=2\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:listContainer_showAllButton\n";
+			e = iimPlay("CODE:" + macroCode);
+        
             macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=TBODY ATTR=ID:listContainer_databody EXTRACT=HTM\n";
             e = iimPlay("CODE:" + macroCode);
             extract = iimGetLastExtract();
+            
+            searchPattern = RegExp(">" + userName + " <"); // the space character between the username and the next tag is significant
         
-            rowsToScan = extract.match(/<tr .+?<\/tr>/g);
-        
-            for (i = 0; i < rowsToScan.length; i++) {
-                if (rowsToScan[i].search(userName) != -1) {
-                    contextualMenuIdNumber = rowsToScan[i].match(/cmlink_(\w{32})/)[1];
+            contextualMenuIdNumber = captureCMID(searchPattern, "TBODY", "listContainer_databody");
                 
-                    macroCode = "TAB T=1\nFRAME F=2\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
-                    macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
-                    macroCode += "TAG POS=1 TYPE=A ATTR=ID:deleteItem_" + contextualMenuIdNumber + "\n";
-                    e = iimPlay("CODE:" + macroCode);
-                }
-            }
+			macroCode = "TAB T=1\nFRAME F=2\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:cmlink_" + contextualMenuIdNumber + "\n";
+			macroCode += "ONDIALOG POS=1 BUTTON=OK CONTENT=\n";
+			macroCode += "TAG POS=1 TYPE=A ATTR=ID:deleteItem_" + contextualMenuIdNumber + "\n";
+			e = iimPlay("CODE:" + macroCode);
         
             macroCode = "TAB T=1\nFRAME F=2\n";
             macroCode += "TAG POS=1 TYPE=A ATTR=TXT:OK\n";
