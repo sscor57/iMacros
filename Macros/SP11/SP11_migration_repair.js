@@ -5,7 +5,7 @@ Instructions: log into any SP11 instance of BB9, navigate to a course or templat
 // replaces a space character (' ') in a string with an iMacros space entity ('<SP>').
 var addIIMSpaces = function(anyStringWithSpaces) {
     var newString = "";
-	
+    
 	try {
 		newString = anyStringWithSpaces.replace(/ /g, "<SP>");
 		return newString
@@ -156,7 +156,7 @@ var templateSetup = function() {
 			for (i = 0; i < assignmentRows.length; i++) {
 				assignmentTitle = assignmentRows[i].match(/u\d{2}a\d{1,2}: *[\s\S]+?(?=<\/a>)/)[0];
 			
-				if (assignmentRows[i].search(/draft/i) > -1) {
+				if (assignmentRows[i].search(/[Dd]raft/i) > -1) {
 					assType = "draft";
 				} else {
 					assType = "final";
@@ -1494,11 +1494,11 @@ var templateSetup = function() {
                         macroCode += "TAB T=1\nFRAME F=5\n"
                         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:title CONTENT=" + addIIMSpaces(tiiTitle) + "\n";
                         macroCode += "TAG POS=1 TYPE=SPAN ATTR=ID:due_link\n";
-                        macroCode += "TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                        macroCode += "TAG POS=15 TYPE=SELECT ATTR=* CONTENT=%11\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
-                        macroCode += "TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                        macroCode += "TAG POS=15 TYPE=SELECT ATTR=* CONTENT=%11\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:>>\n";
-                        macroCode += "TAG POS=14 TYPE=SELECT ATTR=* CONTENT=%11\n";
+                        macroCode += "TAG POS=15 TYPE=SELECT ATTR=* CONTENT=%11\n";
                         macroCode += "TAG POS=1 TYPE=A ATTR=TXT:31\n";
                         macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:https://ne.edgecastcdn.net/800404/www.turnitin.com/image_bin/icons/cms/turnitin/small_16/expand.gif\n";
                         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:late_accept_flag_1\n";
@@ -1508,6 +1508,13 @@ var templateSetup = function() {
                         macroCode += "TAG POS=1 TYPE=INPUT:TEXT FORM=NAME:assignment ATTR=ID:exclude_by_words_value CONTENT=8\n";
                         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:students_view_reports_1\n";
                         macroCode += "TAG POS=1 TYPE=INPUT:RADIO FORM=ID:assignment_create_form ATTR=ID:bb_use_postdate_0\n";
+                        
+                        if (tiiType == 0) {
+							macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:submit_papers_to CONTENT=%2\n";
+                        } else {
+                        	macroCode += "TAG POS=1 TYPE=SELECT FORM=NAME:assignment ATTR=ID:submit_papers_to CONTENT=%0\n";
+                        }
+                        
                         macroCode += "TAG POS=1 TYPE=INPUT:SUBMIT FORM=ID:assignment_create_form ATTR=NAME:submit_form&&VALUE:Submit\n";
                         macroCode += "TAG POS=1 TYPE=IMG ATTR=SRC:http://*.capella.edu/common/ok_off.gif?course_id=_*_1\n";
                         e = iimPlay("CODE:" + macroCode);
